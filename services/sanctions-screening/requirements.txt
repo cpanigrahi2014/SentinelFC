@@ -1,0 +1,6 @@
+fastapi==0.115.0
+uvicorn==0.30.0
+aiokafka==0.10.0
+pydantic==2.7.0
+python-jose[cryptography]==3.3.0
+cryptography==42.0.0

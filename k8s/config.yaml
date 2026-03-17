@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: actimize-config
+  namespace: actimize
+data:
+  POSTGRES_HOST: postgres
+  POSTGRES_PORT: "5432"
+  POSTGRES_DB: actimize
+  KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+  ELASTICSEARCH_URL: http://elasticsearch:9200
+  NEO4J_URI: bolt://neo4j:7687
+  REDIS_URL: redis://redis:6379
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: actimize-secrets
+  namespace: actimize
+type: Opaque
+stringData:
+  POSTGRES_USER: actimize
+  POSTGRES_PASSWORD: actimize_secret
+  NEO4J_USER: neo4j
+  NEO4J_PASSWORD: neo4j_secret
+  JWT_SECRET_KEY: actimize-jwt-secret-change-in-production
+  ENCRYPTION_KEY: YWN0aW1pemUtZW5jcnlwdGlvbi1rZXktMzI=

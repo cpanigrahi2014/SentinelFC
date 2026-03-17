@@ -1,0 +1,708 @@
+# Template for all microservice deployments
+# API Gateway
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+  namespace: actimize
+  labels:
+    app: api-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: api-gateway
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+        - name: api-gateway
+          image: actimize/api-gateway:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: api-gateway
+            - name: SERVICE_PORT
+              value: "8000"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: api-gateway
+  namespace: actimize
+spec:
+  selector:
+    app: api-gateway
+  ports:
+    - port: 8000
+      targetPort: 8000
+---
+# Transaction Monitoring
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transaction-monitoring
+  namespace: actimize
+  labels:
+    app: transaction-monitoring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: transaction-monitoring
+  template:
+    metadata:
+      labels:
+        app: transaction-monitoring
+    spec:
+      containers:
+        - name: transaction-monitoring
+          image: actimize/transaction-monitoring:latest
+          ports:
+            - containerPort: 8001
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: transaction-monitoring
+            - name: SERVICE_PORT
+              value: "8001"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8001
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transaction-monitoring
+  namespace: actimize
+spec:
+  selector:
+    app: transaction-monitoring
+  ports:
+    - port: 8001
+      targetPort: 8001
+---
+# Fraud Detection
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fraud-detection
+  namespace: actimize
+  labels:
+    app: fraud-detection
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: fraud-detection
+  template:
+    metadata:
+      labels:
+        app: fraud-detection
+    spec:
+      containers:
+        - name: fraud-detection
+          image: actimize/fraud-detection:latest
+          ports:
+            - containerPort: 8002
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: fraud-detection
+            - name: SERVICE_PORT
+              value: "8002"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8002
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fraud-detection
+  namespace: actimize
+spec:
+  selector:
+    app: fraud-detection
+  ports:
+    - port: 8002
+      targetPort: 8002
+---
+# Sanctions Screening
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sanctions-screening
+  namespace: actimize
+  labels:
+    app: sanctions-screening
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sanctions-screening
+  template:
+    metadata:
+      labels:
+        app: sanctions-screening
+    spec:
+      containers:
+        - name: sanctions-screening
+          image: actimize/sanctions-screening:latest
+          ports:
+            - containerPort: 8003
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: sanctions-screening
+            - name: SERVICE_PORT
+              value: "8003"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8003
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sanctions-screening
+  namespace: actimize
+spec:
+  selector:
+    app: sanctions-screening
+  ports:
+    - port: 8003
+      targetPort: 8003
+---
+# Customer Risk Scoring
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-risk-scoring
+  namespace: actimize
+  labels:
+    app: customer-risk-scoring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: customer-risk-scoring
+  template:
+    metadata:
+      labels:
+        app: customer-risk-scoring
+    spec:
+      containers:
+        - name: customer-risk-scoring
+          image: actimize/customer-risk-scoring:latest
+          ports:
+            - containerPort: 8004
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: customer-risk-scoring
+            - name: SERVICE_PORT
+              value: "8004"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8004
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: customer-risk-scoring
+  namespace: actimize
+spec:
+  selector:
+    app: customer-risk-scoring
+  ports:
+    - port: 8004
+      targetPort: 8004
+---
+# Alert Management
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-management
+  namespace: actimize
+  labels:
+    app: alert-management
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: alert-management
+  template:
+    metadata:
+      labels:
+        app: alert-management
+    spec:
+      containers:
+        - name: alert-management
+          image: actimize/alert-management:latest
+          ports:
+            - containerPort: 8005
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: alert-management
+            - name: SERVICE_PORT
+              value: "8005"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8005
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-management
+  namespace: actimize
+spec:
+  selector:
+    app: alert-management
+  ports:
+    - port: 8005
+      targetPort: 8005
+---
+# Case Management
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: case-management
+  namespace: actimize
+  labels:
+    app: case-management
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: case-management
+  template:
+    metadata:
+      labels:
+        app: case-management
+    spec:
+      containers:
+        - name: case-management
+          image: actimize/case-management:latest
+          ports:
+            - containerPort: 8006
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: case-management
+            - name: SERVICE_PORT
+              value: "8006"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8006
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: case-management
+  namespace: actimize
+spec:
+  selector:
+    app: case-management
+  ports:
+    - port: 8006
+      targetPort: 8006
+---
+# Network Analytics
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: network-analytics
+  namespace: actimize
+  labels:
+    app: network-analytics
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: network-analytics
+  template:
+    metadata:
+      labels:
+        app: network-analytics
+    spec:
+      containers:
+        - name: network-analytics
+          image: actimize/network-analytics:latest
+          ports:
+            - containerPort: 8007
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: network-analytics
+            - name: SERVICE_PORT
+              value: "8007"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8007
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: network-analytics
+  namespace: actimize
+spec:
+  selector:
+    app: network-analytics
+  ports:
+    - port: 8007
+      targetPort: 8007
+---
+# Regulatory Reporting
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: regulatory-reporting
+  namespace: actimize
+  labels:
+    app: regulatory-reporting
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: regulatory-reporting
+  template:
+    metadata:
+      labels:
+        app: regulatory-reporting
+    spec:
+      containers:
+        - name: regulatory-reporting
+          image: actimize/regulatory-reporting:latest
+          ports:
+            - containerPort: 8008
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: regulatory-reporting
+            - name: SERVICE_PORT
+              value: "8008"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8008
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: regulatory-reporting
+  namespace: actimize
+spec:
+  selector:
+    app: regulatory-reporting
+  ports:
+    - port: 8008
+      targetPort: 8008
+---
+# AI/ML Scoring
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-ml-scoring
+  namespace: actimize
+  labels:
+    app: ai-ml-scoring
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: ai-ml-scoring
+  template:
+    metadata:
+      labels:
+        app: ai-ml-scoring
+    spec:
+      containers:
+        - name: ai-ml-scoring
+          image: actimize/ai-ml-scoring:latest
+          ports:
+            - containerPort: 8009
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: ai-ml-scoring
+            - name: SERVICE_PORT
+              value: "8009"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8009
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 2000m
+              memory: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-ml-scoring
+  namespace: actimize
+spec:
+  selector:
+    app: ai-ml-scoring
+  ports:
+    - port: 8009
+      targetPort: 8009
+---
+# Data Integration
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-integration
+  namespace: actimize
+  labels:
+    app: data-integration
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: data-integration
+  template:
+    metadata:
+      labels:
+        app: data-integration
+    spec:
+      containers:
+        - name: data-integration
+          image: actimize/data-integration:latest
+          ports:
+            - containerPort: 8010
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: data-integration
+            - name: SERVICE_PORT
+              value: "8010"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8010
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 200m
+              memory: 512Mi
+            limits:
+              cpu: 1000m
+              memory: 1Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-integration
+  namespace: actimize
+spec:
+  selector:
+    app: data-integration
+  ports:
+    - port: 8010
+      targetPort: 8010
+---
+# Audit Logging
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: audit-logging
+  namespace: actimize
+  labels:
+    app: audit-logging
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: audit-logging
+  template:
+    metadata:
+      labels:
+        app: audit-logging
+    spec:
+      containers:
+        - name: audit-logging
+          image: actimize/audit-logging:latest
+          ports:
+            - containerPort: 8011
+          envFrom:
+            - configMapRef:
+                name: actimize-config
+            - secretRef:
+                name: actimize-secrets
+          env:
+            - name: SERVICE_NAME
+              value: audit-logging
+            - name: SERVICE_PORT
+              value: "8011"
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8011
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: audit-logging
+  namespace: actimize
+spec:
+  selector:
+    app: audit-logging
+  ports:
+    - port: 8011
+      targetPort: 8011
