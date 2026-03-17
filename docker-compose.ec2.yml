@@ -279,7 +279,10 @@ services:
   # ===================== Frontend =====================
 
   investigation-dashboard:
-    build: ./frontend/investigation-dashboard
+    build:
+      context: ./frontend/investigation-dashboard
+      args:
+        REACT_APP_API_BASE: ""
     ports:
       - "3001:80"
     depends_on:
