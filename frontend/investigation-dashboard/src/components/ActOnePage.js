@@ -60,7 +60,7 @@ const StatCard = ({ title, value, color, subtitle }) => (
   <Card sx={{ height: '100%' }}>
     <CardContent>
       <Typography variant="body2" color="text.secondary" gutterBottom>{title}</Typography>
-      <Typography variant="h4" fontWeight={700} color={color || 'text.primary'}>{value}</Typography>
+      <Typography variant="h4" fontWeight={700} sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }} color={color || 'text.primary'}>{value}</Typography>
       {subtitle && <Typography variant="caption" color="text.secondary">{subtitle}</Typography>}
     </CardContent>
   </Card>
@@ -332,7 +332,7 @@ function CasesTab() {
                 <TableCell><Chip label={c.status.replace(/_/g, ' ')} size="small" color={statusColor(c.status)} /></TableCell>
                 <TableCell><Chip label={c.priority} size="small" color={priorityColor(c.priority)} /></TableCell>
                 <TableCell>{c.assignee || '—'}</TableCell>
-                <TableCell><Typography variant="body2" sx={{ maxWidth: 300, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</Typography></TableCell>
+                <TableCell><Typography variant="body2" sx={{ maxWidth: { xs: 150, sm: 300 }, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.title}</Typography></TableCell>
                 <TableCell><Typography variant="caption">{new Date(c.created_at).toLocaleDateString()}</Typography></TableCell>
               </TableRow>
             ))}
@@ -359,7 +359,7 @@ function Customer360Tab() {
 
   return (
     <Box>
-      <Box display="flex" gap={2} alignItems="center" mb={2}>
+      <Box display="flex" gap={2} alignItems="center" flexWrap="wrap" mb={2}>
         <Typography variant="h6" fontWeight={600}>Customer 360 View</Typography>
         <TextField label="Customer ID" size="small" value={customerId} onChange={(e) => setCustomerId(e.target.value)} />
         <Button startIcon={<SearchIcon />} onClick={load} variant="contained" size="small" disabled={loading}>
@@ -704,7 +704,7 @@ export default function ActOnePage() {
       <Box display="flex" alignItems="center" gap={2} mb={3}>
         <WorkIcon sx={{ fontSize: 36, color: 'primary.main' }} />
         <Box>
-          <Typography variant="h4" fontWeight={700}>ActOne Case Management</Typography>
+          <Typography variant="h4" fontWeight={700} sx={{ fontSize: { xs: '1.5rem', md: '2.125rem' } }}>ActOne Case Management</Typography>
           <Typography variant="body2" color="text.secondary">
             Investigation Hub — Unified case management for AML, Fraud & Trading Surveillance
           </Typography>

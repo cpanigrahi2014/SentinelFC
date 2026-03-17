@@ -28,7 +28,7 @@ export default function AMLPage() {
       </Box>
 
       <Paper sx={{ mb: 3 }}>
-        <Tabs value={subTab} onChange={(_, v) => setSubTab(v)} variant="fullWidth"
+        <Tabs value={subTab} onChange={(_, v) => setSubTab(v)} variant="scrollable" scrollButtons="auto"
           sx={{ '& .MuiTab-root': { fontWeight: 600 } }}>
           <Tab icon={<SecurityIcon />} iconPosition="start" label="Key Capabilities" />
           <Tab icon={<PersonSearchIcon />} iconPosition="start" label="CDD / EDD" />

@@ -180,12 +180,12 @@ function PredictionsTab() {
   return (
     <Box>
       <Typography variant="h6" mb={2}><TrendingUpIcon sx={{ mr: 1, verticalAlign: 'middle' }} />ML Predictions</Typography>
-      <Box display="flex" gap={2} mb={2} alignItems="center">
-        <TextField select label="Model" value={mode} onChange={(e) => { setMode(e.target.value); setResult(null); }} size="small" sx={{ width: 200 }}>
+      <Box display="flex" gap={2} mb={2} alignItems="center" flexWrap="wrap">
+        <TextField select label="Model" value={mode} onChange={(e) => { setMode(e.target.value); setResult(null); }} size="small" sx={{ width: { xs: '100%', sm: 200 } }}>
           <MenuItem value="aml">AML Classifier</MenuItem>
           <MenuItem value="fraud">Fraud Detector</MenuItem>
         </TextField>
-        <TextField label="Amount ($)" type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} size="small" sx={{ width: 150 }} />
+        <TextField label="Amount ($)" type="number" value={amount} onChange={(e) => setAmount(Number(e.target.value))} size="small" sx={{ width: { xs: '100%', sm: 150 } }} />
         <Button variant="contained" startIcon={<PlayArrowIcon />} onClick={mode === 'aml' ? runAml : runFraud} disabled={loading}>
           {loading ? 'Running...' : 'Run Prediction'}
         </Button>
@@ -193,10 +193,10 @@ function PredictionsTab() {
       {result && (
         <Paper sx={{ p: 2 }}>
           <Grid container spacing={2}>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Model</Typography><Typography fontWeight={600}>{result.model_id}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Score</Typography><Typography fontWeight={600} color={result.risk_level === 'critical' ? 'error.main' : result.risk_level === 'high' ? 'warning.main' : 'success.main'}>{(result.aml_score || result.fraud_score)?.toFixed(4)}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Risk Level</Typography><Chip label={result.risk_level} color={riskColor(result.risk_level)} size="small" /></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Confidence</Typography><Typography>{pct(result.confidence)}</Typography></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Model</Typography><Typography fontWeight={600}>{result.model_id}</Typography></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Score</Typography><Typography fontWeight={600} color={result.risk_level === 'critical' ? 'error.main' : result.risk_level === 'high' ? 'warning.main' : 'success.main'}>{(result.aml_score || result.fraud_score)?.toFixed(4)}</Typography></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Risk Level</Typography><Chip label={result.risk_level} color={riskColor(result.risk_level)} size="small" /></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Confidence</Typography><Typography>{pct(result.confidence)}</Typography></Grid>
           </Grid>
           {result.explanation?.top_risk_drivers && (
             <>
@@ -232,18 +232,18 @@ function BehavioralTab() {
   return (
     <Box>
       <Typography variant="h6" mb={2}><PersonSearchIcon sx={{ mr: 1, verticalAlign: 'middle' }} />Adaptive Behavioral Analytics</Typography>
-      <Box display="flex" gap={2} mb={2} alignItems="center">
+      <Box display="flex" gap={2} mb={2} alignItems="center" flexWrap="wrap">
         <TextField label="Customer ID" value={custId} onChange={(e) => setCustId(e.target.value)} size="small" />
-        <TextField label="Amount ($)" type="number" value={amt} onChange={(e) => setAmt(Number(e.target.value))} size="small" sx={{ width: 150 }} />
+        <TextField label="Amount ($)" type="number" value={amt} onChange={(e) => setAmt(Number(e.target.value))} size="small" sx={{ width: { xs: '100%', sm: 150 } }} />
         <Button variant="contained" startIcon={<PlayArrowIcon />} onClick={run} disabled={loading}>Update Profile</Button>
       </Box>
       {result && (
         <Paper sx={{ p: 2 }}>
           <Grid container spacing={2}>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Customer</Typography><Typography fontWeight={600}>{result.customer_id}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Observations</Typography><Typography>{result.observations}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Avg Amount</Typography><Typography>${result.avg_transaction_amount?.toLocaleString()}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Risk Adj</Typography><Chip label={result.risk_adjustment} color={result.risk_adjustment === 'elevated' ? 'warning' : 'success'} size="small" /></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Customer</Typography><Typography fontWeight={600}>{result.customer_id}</Typography></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Observations</Typography><Typography>{result.observations}</Typography></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Avg Amount</Typography><Typography>${result.avg_transaction_amount?.toLocaleString()}</Typography></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Risk Adj</Typography><Chip label={result.risk_adjustment} color={result.risk_adjustment === 'elevated' ? 'warning' : 'success'} size="small" /></Grid>
           </Grid>
           {result.deviations?.length > 0 && (
             <>
@@ -278,22 +278,22 @@ function PeerGroupTab() {
   return (
     <Box>
       <Typography variant="h6" mb={2}><GroupWorkIcon sx={{ mr: 1, verticalAlign: 'middle' }} />Peer Group Analysis</Typography>
-      <Box display="flex" gap={2} mb={2} alignItems="center">
-        <TextField select label="Peer Group" value={group} onChange={(e) => setGroup(e.target.value)} size="small" sx={{ width: 250 }}>
+      <Box display="flex" gap={2} mb={2} alignItems="center" flexWrap="wrap">
+        <TextField select label="Peer Group" value={group} onChange={(e) => setGroup(e.target.value)} size="small" sx={{ width: { xs: '100%', sm: 250 } }}>
           {['retail_banking_individual', 'small_business', 'corporate', 'high_net_worth', 'money_service_business'].map(g => (
             <MenuItem key={g} value={g}>{g.replace(/_/g, ' ')}</MenuItem>
           ))}
         </TextField>
-        <TextField label="Monthly Amount ($)" type="number" value={amt} onChange={(e) => setAmt(Number(e.target.value))} size="small" sx={{ width: 180 }} />
+        <TextField label="Monthly Amount ($)" type="number" value={amt} onChange={(e) => setAmt(Number(e.target.value))} size="small" sx={{ width: { xs: '100%', sm: 180 } }} />
         <Button variant="contained" startIcon={<PlayArrowIcon />} onClick={run} disabled={loading}>Analyze</Button>
       </Box>
       {result && (
         <Paper sx={{ p: 2 }}>
           <Grid container spacing={2}>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Peer Group</Typography><Typography fontWeight={600}>{result.peer_group?.replace(/_/g, ' ')}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Z-Score</Typography><Typography fontWeight={600}>{result.metrics?.monthly_amount?.z_score}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Peer Avg</Typography><Typography>${result.metrics?.monthly_amount?.peer_avg?.toLocaleString()}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Risk Level</Typography><Chip label={result.risk_level} color={riskColor(result.risk_level)} size="small" /></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Peer Group</Typography><Typography fontWeight={600}>{result.peer_group?.replace(/_/g, ' ')}</Typography></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Z-Score</Typography><Typography fontWeight={600}>{result.metrics?.monthly_amount?.z_score}</Typography></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Peer Avg</Typography><Typography>${result.metrics?.monthly_amount?.peer_avg?.toLocaleString()}</Typography></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Risk Level</Typography><Chip label={result.risk_level} color={riskColor(result.risk_level)} size="small" /></Grid>
           </Grid>
           {result.anomaly_flags?.length > 0 && (
             <>
@@ -338,10 +338,10 @@ function AnomalyTab() {
       {result && (
         <Paper sx={{ p: 2 }}>
           <Grid container spacing={2} mb={2}>
-            <Grid item xs={3}><StatCard title="Transactions" value={result.total_transactions} /></Grid>
-            <Grid item xs={3}><StatCard title="Anomalies" value={result.anomalies_detected} color="error.main" /></Grid>
-            <Grid item xs={3}><StatCard title="Anomaly Rate" value={pct(result.anomaly_rate)} /></Grid>
-            <Grid item xs={3}><StatCard title="Methods Used" value={result.methods_used?.length} /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="Transactions" value={result.total_transactions} /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="Anomalies" value={result.anomalies_detected} color="error.main" /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="Anomaly Rate" value={pct(result.anomaly_rate)} /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="Methods Used" value={result.methods_used?.length} /></Grid>
           </Grid>
           <TableContainer>
             <Table size="small">
@@ -398,7 +398,7 @@ function RiskScoringTab() {
         <Typography variant="subtitle2" gutterBottom>Risk Factor Inputs (0.0 - 1.0)</Typography>
         <Grid container spacing={2}>
           {Object.entries(factors).map(([k, v]) => (
-            <Grid item xs={4} key={k}>
+            <Grid item xs={12} sm={6} md={4} key={k}>
               <TextField label={k.replace(/_/g, ' ')} type="number" value={v} onChange={(e) => setFactors({ ...factors, [k]: Number(e.target.value) })}
                 size="small" fullWidth inputProps={{ step: 0.05, min: 0, max: 1 }} />
             </Grid>
@@ -411,10 +411,10 @@ function RiskScoringTab() {
       {result && (
         <Paper sx={{ p: 2 }}>
           <Grid container spacing={2}>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Risk Score</Typography><Typography variant="h4" fontWeight={700} color={riskColor(result.risk_level) + '.main'}>{result.risk_score?.toFixed(4)}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Risk Level</Typography><Chip label={result.risk_level} color={riskColor(result.risk_level)} /></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Previous</Typography><Typography>{result.previous_score}</Typography></Grid>
-            <Grid item xs={3}><Typography variant="body2" color="text.secondary">Trend</Typography><Chip label={result.trend} color={result.trend === 'increasing' ? 'warning' : 'success'} size="small" /></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Risk Score</Typography><Typography variant="h4" fontWeight={700} color={riskColor(result.risk_level) + '.main'}>{result.risk_score?.toFixed(4)}</Typography></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Risk Level</Typography><Chip label={result.risk_level} color={riskColor(result.risk_level)} /></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Previous</Typography><Typography>{result.previous_score}</Typography></Grid>
+            <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Trend</Typography><Chip label={result.trend} color={result.trend === 'increasing' ? 'warning' : 'success'} size="small" /></Grid>
           </Grid>
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" gutterBottom>Component Scores & Weights</Typography>
@@ -522,10 +522,10 @@ function GovernanceTab() {
         <Button startIcon={<RefreshIcon />} onClick={load}>Refresh</Button>
       </Box>
       <Grid container spacing={2} mb={3}>
-        <Grid item xs={3}><StatCard title="Total Models" value={data.total_models} /></Grid>
-        <Grid item xs={3}><StatCard title="Drift Alerts" value={data.drift_alerts} color="warning.main" /></Grid>
-        <Grid item xs={3}><StatCard title="Retraining Needed" value={data.retraining_needed} color="error.main" /></Grid>
-        <Grid item xs={3}><StatCard title="Active" value={data.active_models} color="success.main" /></Grid>
+        <Grid item xs={6} sm={3}><StatCard title="Total Models" value={data.total_models} /></Grid>
+        <Grid item xs={6} sm={3}><StatCard title="Drift Alerts" value={data.drift_alerts} color="warning.main" /></Grid>
+        <Grid item xs={6} sm={3}><StatCard title="Retraining Needed" value={data.retraining_needed} color="error.main" /></Grid>
+        <Grid item xs={6} sm={3}><StatCard title="Active" value={data.active_models} color="success.main" /></Grid>
       </Grid>
       <TableContainer component={Paper}>
         <Table size="small">
@@ -555,10 +555,10 @@ function GovernanceTab() {
       <Paper sx={{ p: 2, mt: 2 }}>
         <Typography variant="subtitle2" gutterBottom>Governance Policies</Typography>
         <Grid container spacing={2}>
-          <Grid item xs={3}><Typography variant="body2" color="text.secondary">Max PSI</Typography><Typography>{data.governance_policies?.max_psi_threshold}</Typography></Grid>
-          <Grid item xs={3}><Typography variant="body2" color="text.secondary">Min Accuracy</Typography><Typography>{data.governance_policies?.min_accuracy_threshold}</Typography></Grid>
-          <Grid item xs={3}><Typography variant="body2" color="text.secondary">Retrain Freq</Typography><Typography>{data.governance_policies?.retraining_frequency}</Typography></Grid>
-          <Grid item xs={3}><Typography variant="body2" color="text.secondary">Validation Freq</Typography><Typography>{data.governance_policies?.validation_frequency}</Typography></Grid>
+          <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Max PSI</Typography><Typography>{data.governance_policies?.max_psi_threshold}</Typography></Grid>
+          <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Min Accuracy</Typography><Typography>{data.governance_policies?.min_accuracy_threshold}</Typography></Grid>
+          <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Retrain Freq</Typography><Typography>{data.governance_policies?.retraining_frequency}</Typography></Grid>
+          <Grid item xs={6} sm={3}><Typography variant="body2" color="text.secondary">Validation Freq</Typography><Typography>{data.governance_policies?.validation_frequency}</Typography></Grid>
         </Grid>
       </Paper>
     </Box>
@@ -583,22 +583,22 @@ function IngestionTab() {
   return (
     <Box>
       <Typography variant="h6" mb={2}><StorageIcon sx={{ mr: 1, verticalAlign: 'middle' }} />Data Ingestion & Big Data Analytics</Typography>
-      <Box display="flex" gap={2} mb={2} alignItems="center">
-        <TextField select label="Source Type" value={source} onChange={(e) => setSource(e.target.value)} size="small" sx={{ width: 200 }}>
+      <Box display="flex" gap={2} mb={2} alignItems="center" flexWrap="wrap">
+        <TextField select label="Source Type" value={source} onChange={(e) => setSource(e.target.value)} size="small" sx={{ width: { xs: '100%', sm: 200 } }}>
           {['transaction_feed', 'customer_data', 'watchlist', 'market_data', 'external_api'].map(s => (
             <MenuItem key={s} value={s}>{s.replace(/_/g, ' ')}</MenuItem>
           ))}
         </TextField>
-        <TextField label="Record Count" type="number" value={records} onChange={(e) => setRecords(Number(e.target.value))} size="small" sx={{ width: 150 }} />
+        <TextField label="Record Count" type="number" value={records} onChange={(e) => setRecords(Number(e.target.value))} size="small" sx={{ width: { xs: '100%', sm: 150 } }} />
         <Button variant="contained" startIcon={<PlayArrowIcon />} onClick={run} disabled={loading}>Run Ingestion</Button>
       </Box>
       {result && (
         <Paper sx={{ p: 2 }}>
           <Grid container spacing={2} mb={2}>
-            <Grid item xs={3}><StatCard title="Records Ingested" value={result.records_ingested?.toLocaleString()} /></Grid>
-            <Grid item xs={3}><StatCard title="Anomalies Flagged" value={result.anomalies_flagged?.toLocaleString()} color="warning.main" /></Grid>
-            <Grid item xs={3}><StatCard title="Processing Time" value={`${result.processing_time_seconds}s`} /></Grid>
-            <Grid item xs={3}><StatCard title="Data Quality" value={pct(result.data_quality_score)} color="success.main" /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="Records Ingested" value={result.records_ingested?.toLocaleString()} /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="Anomalies Flagged" value={result.anomalies_flagged?.toLocaleString()} color="warning.main" /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="Processing Time" value={`${result.processing_time_seconds}s`} /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="Data Quality" value={pct(result.data_quality_score)} color="success.main" /></Grid>
           </Grid>
           <Typography variant="subtitle2" gutterBottom>Pipeline Stages</Typography>
           {result.pipeline_stages?.map((s) => (
@@ -632,25 +632,25 @@ function SimulationTab() {
   return (
     <Box>
       <Typography variant="h6" mb={2}><TuneIcon sx={{ mr: 1, verticalAlign: 'middle' }} />Scenario Simulation & Tuning</Typography>
-      <Box display="flex" gap={2} mb={2} alignItems="center">
+      <Box display="flex" gap={2} mb={2} alignItems="center" flexWrap="wrap">
         <TextField label="Threshold" type="number" value={threshold} onChange={(e) => setThreshold(Number(e.target.value))}
-          size="small" sx={{ width: 150 }} inputProps={{ step: 0.05, min: 0.1, max: 0.95 }} />
+          size="small" sx={{ width: { xs: '100%', sm: 150 } }} inputProps={{ step: 0.05, min: 0.1, max: 0.95 }} />
         <Button variant="contained" startIcon={<PlayArrowIcon />} onClick={run} disabled={loading}>Run Simulation</Button>
       </Box>
       {result && (
         <Paper sx={{ p: 2 }}>
           <Grid container spacing={2} mb={2}>
-            <Grid item xs={3}><StatCard title="Precision" value={pct(result.metrics?.precision)} /></Grid>
-            <Grid item xs={3}><StatCard title="Recall" value={pct(result.metrics?.recall)} /></Grid>
-            <Grid item xs={3}><StatCard title="F1 Score" value={pct(result.metrics?.f1_score)} /></Grid>
-            <Grid item xs={3}><StatCard title="Alert Reduction" value={`${result.metrics?.alert_reduction_pct?.toFixed(1)}%`} color="success.main" /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="Precision" value={pct(result.metrics?.precision)} /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="Recall" value={pct(result.metrics?.recall)} /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="F1 Score" value={pct(result.metrics?.f1_score)} /></Grid>
+            <Grid item xs={6} sm={3}><StatCard title="Alert Reduction" value={`${result.metrics?.alert_reduction_pct?.toFixed(1)}%`} color="success.main" /></Grid>
           </Grid>
           <Typography variant="subtitle2" gutterBottom>Confusion Matrix</Typography>
           <Grid container spacing={1} mb={2}>
-            <Grid item xs={3}><Chip label={`TP: ${result.confusion_matrix?.true_positives?.toLocaleString()}`} color="success" /></Grid>
-            <Grid item xs={3}><Chip label={`FP: ${result.confusion_matrix?.false_positives?.toLocaleString()}`} color="warning" /></Grid>
-            <Grid item xs={3}><Chip label={`FN: ${result.confusion_matrix?.false_negatives?.toLocaleString()}`} color="error" /></Grid>
-            <Grid item xs={3}><Chip label={`TN: ${result.confusion_matrix?.true_negatives?.toLocaleString()}`} color="info" /></Grid>
+            <Grid item xs={6} sm={3}><Chip label={`TP: ${result.confusion_matrix?.true_positives?.toLocaleString()}`} color="success" /></Grid>
+            <Grid item xs={6} sm={3}><Chip label={`FP: ${result.confusion_matrix?.false_positives?.toLocaleString()}`} color="warning" /></Grid>
+            <Grid item xs={6} sm={3}><Chip label={`FN: ${result.confusion_matrix?.false_negatives?.toLocaleString()}`} color="error" /></Grid>
+            <Grid item xs={6} sm={3}><Chip label={`TN: ${result.confusion_matrix?.true_negatives?.toLocaleString()}`} color="info" /></Grid>
           </Grid>
           <Alert severity={result.recommendation === 'optimal' ? 'success' : 'info'}>
             Recommendation: <strong>{result.recommendation?.replace(/_/g, ' ')}</strong>
@@ -679,7 +679,7 @@ function ScenariosTab() {
     <Box>
       <Typography variant="h6" mb={2}><PlayArrowIcon sx={{ mr: 1, verticalAlign: 'middle' }} />Scenario Execution</Typography>
       <Grid container spacing={2} mb={3}>
-        <Grid item xs={4}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card sx={{ cursor: 'pointer', border: activeScenario === 'alert' ? 2 : 0, borderColor: 'primary.main' }}
             onClick={() => runScenario('alert', aimlScenarioAlertReduction)}>
             <CardContent>
@@ -688,7 +688,7 @@ function ScenariosTab() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card sx={{ cursor: 'pointer', border: activeScenario === 'fraud' ? 2 : 0, borderColor: 'primary.main' }}
             onClick={() => runScenario('fraud', aimlScenarioPredictiveFraud)}>
             <CardContent>
@@ -697,7 +697,7 @@ function ScenariosTab() {
             </CardContent>
           </Card>
         </Grid>
-        <Grid item xs={4}>
+        <Grid item xs={12} sm={6} md={4}>
           <Card sx={{ cursor: 'pointer', border: activeScenario === 'risk' ? 2 : 0, borderColor: 'primary.main' }}
             onClick={() => runScenario('risk', aimlScenarioRiskUpdate)}>
             <CardContent>
@@ -772,10 +772,10 @@ function InfoTab() {
     <Box>
       <Typography variant="h6" mb={2}><InfoIcon sx={{ mr: 1, verticalAlign: 'middle' }} />{info.engine} v{info.version}</Typography>
       <Grid container spacing={2} mb={3}>
-        <Grid item xs={3}><StatCard title="Components" value={info.total_components} /></Grid>
-        <Grid item xs={3}><StatCard title="Models" value={info.model_count} /></Grid>
-        <Grid item xs={3}><StatCard title="Peer Groups" value={info.peer_groups} /></Grid>
-        <Grid item xs={3}><StatCard title="XAI Methods" value={info.xai_methods} /></Grid>
+        <Grid item xs={6} sm={3}><StatCard title="Components" value={info.total_components} /></Grid>
+        <Grid item xs={6} sm={3}><StatCard title="Models" value={info.model_count} /></Grid>
+        <Grid item xs={6} sm={3}><StatCard title="Peer Groups" value={info.peer_groups} /></Grid>
+        <Grid item xs={6} sm={3}><StatCard title="XAI Methods" value={info.xai_methods} /></Grid>
       </Grid>
       <Paper sx={{ p: 2, mb: 2 }}>
         <Typography variant="subtitle1" gutterBottom>Components</Typography>

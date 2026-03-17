@@ -270,11 +270,11 @@ function OnboardingTab() {
         <DialogTitle>New Customer Onboarding</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 0.5 }}>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <TextField label="Customer ID" fullWidth size="small" value={form.customer_id}
                 onChange={(e) => setForm({ ...form, customer_id: e.target.value })} />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>Customer Type</InputLabel>
                 <Select value={form.customer_type} label="Customer Type"
@@ -286,19 +286,19 @@ function OnboardingTab() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <TextField label="First Name" fullWidth size="small" value={form.first_name}
                 onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <TextField label="Last Name" fullWidth size="small" value={form.last_name}
                 onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <TextField label="Country (ISO)" fullWidth size="small" value={form.country_of_residence}
                 onChange={(e) => setForm({ ...form, country_of_residence: e.target.value })} />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <FormControl fullWidth size="small">
                 <InputLabel>PEP Status</InputLabel>
                 <Select value={form.pep_status} label="PEP Status"
@@ -308,11 +308,11 @@ function OnboardingTab() {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <TextField label="Annual Income" fullWidth size="small" type="number" value={form.annual_income}
                 onChange={(e) => setForm({ ...form, annual_income: Number(e.target.value) })} />
             </Grid>
-            <Grid item xs={6}>
+            <Grid item xs={12} sm={6}>
               <TextField label="Age" fullWidth size="small" type="number" value={form.age}
                 onChange={(e) => setForm({ ...form, age: Number(e.target.value) })} />
             </Grid>
@@ -663,7 +663,7 @@ function IntegrationsTab() {
 
       <Box display="flex" alignItems="center" gap={2} mb={3}>
         <TextField label="Customer ID" value={customerId} size="small"
-          onChange={(e) => setCustomerId(e.target.value)} sx={{ width: 200 }} />
+          onChange={(e) => setCustomerId(e.target.value)} sx={{ width: { xs: '100%', sm: 200 } }} />
         <Typography variant="body2" color="text.secondary">Select a customer ID to sync with integrations</Typography>
       </Box>
 

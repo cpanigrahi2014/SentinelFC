@@ -28,7 +28,7 @@ export default function FraudPage() {
       </Box>
 
       <Paper sx={{ mb: 3 }}>
-        <Tabs value={subTab} onChange={(_, v) => setSubTab(v)} variant="fullWidth"
+        <Tabs value={subTab} onChange={(_, v) => setSubTab(v)} variant="scrollable" scrollButtons="auto"
           sx={{ '& .MuiTab-root': { fontWeight: 600 } }}>
           <Tab icon={<TravelExploreIcon />} iconPosition="start" label="Enterprise Fraud (EFM)" />
           <Tab icon={<PhonelinkLockIcon />} iconPosition="start" label="Digital Banking Fraud (DBF)" />

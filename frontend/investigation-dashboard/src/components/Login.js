@@ -31,7 +31,7 @@ export default function Login() {
 
   return (
     <Container maxWidth="sm">
-      <Box sx={{ mt: 12, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      <Box sx={{ mt: { xs: 4, sm: 8, md: 12 }, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <Avatar sx={{ m: 1, bgcolor: 'primary.main', width: 56, height: 56 }}>
           <LockOutlinedIcon />
         </Avatar>
@@ -40,7 +40,7 @@ export default function Login() {
           Financial Crime Investigation Platform
         </Typography>
         <Card sx={{ width: '100%' }}>
-          <CardContent sx={{ p: 4 }}>
+          <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
             {error && <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>}
             <form onSubmit={handleSubmit}>
               <TextField

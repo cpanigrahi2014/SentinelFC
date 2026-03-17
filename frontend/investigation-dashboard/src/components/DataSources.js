@@ -173,7 +173,7 @@ function FieldMappingTab({ fieldMappings, fieldMappingsLoading, setFieldMappings
                   </Box>
                 </Box>
                 <Box display="flex" alignItems="center" gap={2}>
-                  <Box sx={{ minWidth: 140 }}>
+                  <Box sx={{ minWidth: { xs: 80, sm: 140 } }}>
                     <Box display="flex" justifyContent="space-between" mb={0.25}>
                       <Typography variant="caption">Required</Typography>
                       <Typography variant="caption" fontWeight={600}>
@@ -297,7 +297,7 @@ function DataQualityTab({ ingestionResults, ingestionRunning, setIngestionResult
   return (
     <>
       {/* Action Bar */}
-      <Paper sx={{ p: 2, mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Paper sx={{ p: 2, mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <Box>
           <Typography variant="subtitle1" fontWeight={700}>
             Test Ingestion &amp; Data Quality Validation
@@ -406,7 +406,7 @@ function DataQualityTab({ ingestionResults, ingestionRunning, setIngestionResult
                     </Box>
                     <Box display="flex" alignItems="center" gap={2}>
                       <Chip label={fc.label} size="small" color={fc.color} variant="outlined" />
-                      <Box sx={{ minWidth: 120 }}>
+                      <Box sx={{ minWidth: { xs: 80, sm: 120 } }}>
                         <Box display="flex" justifyContent="space-between" mb={0.25}>
                           <Typography variant="caption">Completeness</Typography>
                           <Typography variant="caption" fontWeight={600}>{sr.completeness_pct}%</Typography>
@@ -889,7 +889,7 @@ function PipelineTestTab({ pipelineResults, pipelineRunning, setPipelineResults,
   return (
     <>
       {/* Action bar */}
-      <Paper sx={{ p: 2, mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Paper sx={{ p: 2, mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <Box>
           <Typography variant="subtitle1" fontWeight={700}>
             End-to-End Pipeline Test
@@ -1220,7 +1220,7 @@ function MonitoringTab({ metricsData, metricsLoading, setMetricsData, setMetrics
   return (
     <>
       {/* Header bar */}
-      <Paper sx={{ p: 2, mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Paper sx={{ p: 2, mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <Box>
           <Typography variant="subtitle1" fontWeight={700}>
             <MonitorHeartIcon sx={{ fontSize: 20, mr: 0.5, verticalAlign: 'text-bottom' }} />
@@ -1624,7 +1624,7 @@ function DocumentationTab({ inventoryData, inventoryLoading, setInventoryData, s
   return (
     <>
       {/* Header */}
-      <Paper sx={{ p: 2, mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Paper sx={{ p: 2, mb: 3, display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap' }}>
         <Box>
           <Typography variant="subtitle1" fontWeight={700}>
             <DescriptionIcon sx={{ fontSize: 20, mr: 0.5, verticalAlign: 'text-bottom' }} />
@@ -1977,7 +1977,7 @@ function DocumentationTab({ inventoryData, inventoryLoading, setInventoryData, s
                 <Typography variant="caption" color="text.secondary">Actor</Typography>
                 <Typography variant="body2" fontFamily="monospace" fontSize={12}>{entry.actor}</Typography>
               </Box>
-              <Box sx={{ minWidth: 140 }}>
+              <Box sx={{ minWidth: { xs: 80, sm: 140 } }}>
                 <Chip
                   label={entry.action.replace(/_/g, ' ')}
                   size="small"
@@ -2660,7 +2660,7 @@ function WLFTab({ wlfData, wlfLoading, setWlfData, setWlfLoading }) {
             <TextField fullWidth size="small" label="Name to screen" value={nameInput}
               onChange={(e) => setNameInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleNameScreen()} />
-            <Button variant="contained" onClick={handleNameScreen} disabled={nameLoading} sx={{ minWidth: 120 }}>
+            <Button variant="contained" onClick={handleNameScreen} disabled={nameLoading} sx={{ minWidth: { xs: 80, sm: 120 } }}>
               {nameLoading ? <CircularProgress size={20} /> : 'Screen'}
             </Button>
           </Box>
@@ -3451,7 +3451,7 @@ function DBFTab({ dbfData, dbfLoading, setDbfData, setDbfLoading }) {
         result={botResult} engineName="bot"
         controls={
           <TextField select size="small" value={botSeverity} onChange={(e) => setBotSeverity(e.target.value)}
-            sx={{ minWidth: 120 }}>
+            sx={{ minWidth: { xs: 80, sm: 120 } }}>
             <MenuItem value="critical">Critical Bot</MenuItem>
             <MenuItem value="high">High Severity</MenuItem>
           </TextField>
