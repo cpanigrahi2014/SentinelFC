@@ -27,7 +27,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -498,6 +498,12 @@ function ScenariosTab() {
       desc: 'Shared address/phone/device scan → trading pattern correlation (tippee network) → profit-after-event → communication link analysis → insider MNPI access confirmation → compliance → SEC/DOJ referral' },
     { key: 'insiderInfoLeakage', label: 'Insider: Information Leakage', icon: <SecurityIcon />, fn: actoneScenarioInsiderInfoLeakage,
       desc: 'Small repeated buys detection (gradual accumulation) → pattern clustering (lot size growth, timing, broker splitting) → news event correlation → profit analysis → information source investigation → compliance → SEC/FINRA referral' },
+    { key: 'coordinatedTrading', label: 'Coordinated Trading Ring', icon: <TrendingUpIcon />, fn: actoneScenarioCoordinatedTrading,
+      desc: 'Time synchronization detection (6 accounts within 1.96 sec) → strategy execution analysis (same algo fingerprint) → coordinated exit detection → network relationship mapping → market impact → compliance → SEC/FINRA/DOJ referral' },
+    { key: 'circularTrading', label: 'Circular Trading (A→B→C→A)', icon: <TrendingUpIcon />, fn: actoneScenarioCircularTrading,
+      desc: 'Trade chain graph detection (circular loop) → ownership change verification (net zero) → price inflation measurement → beneficial ownership mapping (common UBO) → retail harm → compliance → SEC/FINRA/DOJ referral' },
+    { key: 'crossMarketManipulation', label: 'Cross-Market Manipulation', icon: <TrendingUpIcon />, fn: actoneScenarioCrossMarketManipulation,
+      desc: 'Futures/equity correlation check (beta divergence) → price movement linkage → derivative preloading detection → manipulation profit calculation → cross-exchange review → compliance → SEC/CFTC/DOJ referral' },
   ];
 
   return (

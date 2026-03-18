@@ -231,6 +231,12 @@ export const actoneScenarioInsiderConnectedAccounts = () =>
   api.post('/api/admin/data-sources/actone/scenarios/insider-connected-accounts');
 export const actoneScenarioInsiderInfoLeakage = () =>
   api.post('/api/admin/data-sources/actone/scenarios/insider-information-leakage');
+export const actoneScenarioCoordinatedTrading = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/coordinated-trading');
+export const actoneScenarioCircularTrading = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/circular-trading');
+export const actoneScenarioCrossMarketManipulation = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/cross-market-manipulation');
 export const getActoneCustomer360 = (customerId) =>
   api.get(`/api/admin/data-sources/actone/customer360/${customerId}`);
 export const getActoneStateMachine = () =>
