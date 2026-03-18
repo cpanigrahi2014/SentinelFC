@@ -237,6 +237,12 @@ export const actoneScenarioCircularTrading = () =>
   api.post('/api/admin/data-sources/actone/scenarios/circular-trading');
 export const actoneScenarioCrossMarketManipulation = () =>
   api.post('/api/admin/data-sources/actone/scenarios/cross-market-manipulation');
+export const actoneScenarioMomentumIgnition = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/momentum-ignition');
+export const actoneScenarioLatencyArbitrage = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/latency-arbitrage');
+export const actoneScenarioOrderBookImbalance = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/order-book-imbalance');
 export const getActoneCustomer360 = (customerId) =>
   api.get(`/api/admin/data-sources/actone/customer360/${customerId}`);
 export const getActoneStateMachine = () =>

@@ -27,7 +27,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -504,6 +504,12 @@ function ScenariosTab() {
       desc: 'Trade chain graph detection (circular loop) → ownership change verification (net zero) → price inflation measurement → beneficial ownership mapping (common UBO) → retail harm → compliance → SEC/FINRA/DOJ referral' },
     { key: 'crossMarketManipulation', label: 'Cross-Market Manipulation', icon: <TrendingUpIcon />, fn: actoneScenarioCrossMarketManipulation,
       desc: 'Futures/equity correlation check (beta divergence) → price movement linkage → derivative preloading detection → manipulation profit calculation → cross-exchange review → compliance → SEC/CFTC/DOJ referral' },
+    { key: 'momentumIgnition', label: 'Momentum Ignition', icon: <TrendingUpIcon />, fn: actoneScenarioMomentumIgnition,
+      desc: 'Burst trade detection (aggressive orders → price spike) → momentum cascade (stop-losses + algo triggers + retail FOMO) → profit exit at peak → price reversion confirmation (99%+) → historical pattern → compliance → SEC/FINRA referral' },
+    { key: 'latencyArbitrage', label: 'Latency Arbitrage', icon: <SecurityIcon />, fn: actoneScenarioLatencyArbitrage,
+      desc: 'Faster execution vs market data lag (40µs vs 900µs) → stale quote exploitation mapping → victim impact (MM + institutional + retail) → infrastructure investigation (co-lo, microwave) → compliance → SEC/FINRA referral' },
+    { key: 'orderBookImbalance', label: 'Order Book Imbalance Exploitation', icon: <SecurityIcon />, fn: actoneScenarioOrderBookImbalance,
+      desc: 'Sudden imbalance creation (phantom bid/ask wall) → reversal detection (mass cancel + opposite execution) → intent analysis (0% fill rate) → victim impact → 30-day pattern history → compliance → SEC/FINRA referral' },
   ];
 
   return (
