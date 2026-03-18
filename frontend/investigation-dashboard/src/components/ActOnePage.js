@@ -22,12 +22,14 @@ import RefreshIcon from '@mui/icons-material/Refresh';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import InfoIcon from '@mui/icons-material/Info';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import StorageIcon from '@mui/icons-material/Storage';
+import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SecurityIcon from '@mui/icons-material/Security';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation, actoneScenarioRogueTrader, actoneScenarioUnusualProfitability, actoneScenarioEquityOptionsManipulation, actoneScenarioFxManipulation, actoneScenarioCommodityManipulation, actoneScenarioRegulatoryCompliance,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation, actoneScenarioRogueTrader, actoneScenarioUnusualProfitability, actoneScenarioEquityOptionsManipulation, actoneScenarioFxManipulation, actoneScenarioCommodityManipulation, actoneScenarioRegulatoryCompliance, actoneScenarioMissingData, actoneScenarioDuplicateTrades, actoneScenarioTimeSyncIssues,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -524,6 +526,12 @@ function ScenariosTab() {
       desc: 'Physical hoarding (68% warehouse, 142K MT) → queue manipulation (14→89 days) → futures price impact (+18.4%, $633M) → cross-exchange arbitrage ($48M) → downstream harm ($1.4B, 340 consumers) → CFTC/LME/FCA/DOJ referral' },
     { key: 'regulatoryCompliance', label: 'Regulatory Compliance (SEC/FINRA/ESMA)', icon: <GavelIcon />, fn: actoneScenarioRegulatoryCompliance,
       desc: 'Rule threshold breach alerts (14 categories, <60s SLA) → audit trail completeness (847K events, SHA-256, 7yr retention) → alert escalation workflow (5 tiers, auto-escalation) → case management lifecycle (8 states, reopen) → 42 rules tested (12 SEC + 16 FINRA + 14 ESMA) — 100% passing' },
+    { key: 'missingData', label: 'Missing Data Detection', icon: <StorageIcon />, fn: actoneScenarioMissingData,
+      desc: 'Sequence gap analysis (14,283 missing trades, 62,410 orders across 4 venues) → root causes (feed drop, parser timeout, connectivity) → surveillance impact (23 alerts, 12 false negatives) → 100% recovery via venue replay → MTTD 4.2 min, MTTR 47 min' },
+    { key: 'duplicateTrades', label: 'Duplicate Trade Detection', icon: <StorageIcon />, fn: actoneScenarioDuplicateTrades,
+      desc: '5,056 duplicates in 4.2M trades (0.12%) → FIX retransmission (51.7%), Kafka rebalance (28.5%), venue corrections (19.8%) → 18 false-positive alerts suppressed → $142.8M notional corrected → idempotency + exactly-once controls deployed' },
+    { key: 'timeSyncIssues', label: 'Time Sync Issues Detection', icon: <AccessTimeIcon />, fn: actoneScenarioTimeSyncIssues,
+      desc: '6/48 systems drifted (worst 340ms) → 31,847 timestamp violations (0.76%) → 50 surveillance alerts affected (14 FP, 6 FN) → GPS PPS correction → NTP remediation all 6 systems → MiFID II RTS-25 compliant, continuous monitoring' },
   ];
 
   return (
