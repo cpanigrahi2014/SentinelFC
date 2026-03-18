@@ -225,6 +225,12 @@ export const actoneScenarioMarkingTheClose = () =>
   api.post('/api/admin/data-sources/actone/scenarios/marking-the-close');
 export const actoneScenarioQuoteStuffing = () =>
   api.post('/api/admin/data-sources/actone/scenarios/quote-stuffing');
+export const actoneScenarioInsiderBeforeNews = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/insider-trading-before-news');
+export const actoneScenarioInsiderConnectedAccounts = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/insider-connected-accounts');
+export const actoneScenarioInsiderInfoLeakage = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/insider-information-leakage');
 export const getActoneCustomer360 = (customerId) =>
   api.get(`/api/admin/data-sources/actone/customer360/${customerId}`);
 export const getActoneStateMachine = () =>

@@ -27,7 +27,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -492,6 +492,12 @@ function ScenariosTab() {
       desc: 'Closing window anomaly (large trades in last 5–10 min) → VWAP deviation analysis → trade pattern reconstruction → portfolio NAV impact → historical quarter-end pattern → compliance → SEC/FINRA referral' },
     { key: 'quoteStuffing', label: 'Quote Stuffing Detection', icon: <TrendingUpIcon />, fn: actoneScenarioQuoteStuffing,
       desc: 'Message rate anomaly (thousands of orders/sec) → exchange latency impact → cancellation ratio analysis (99%+ cancel, sub-ms lifespan) → stale NBBO exploitation → historical pattern → compliance → SEC/FINRA referral' },
+    { key: 'insiderBeforeNews', label: 'Insider: Trading Before Material News', icon: <SecurityIcon />, fn: actoneScenarioInsiderBeforeNews,
+      desc: 'Trade timestamp vs news release correlation → profit-after-event (options leverage) → MNPI access verification → trading pattern anomaly (zero prior history) → communication surveillance → compliance → SEC/DOJ referral' },
+    { key: 'insiderConnected', label: 'Insider: Connected Accounts', icon: <SecurityIcon />, fn: actoneScenarioInsiderConnectedAccounts,
+      desc: 'Shared address/phone/device scan → trading pattern correlation (tippee network) → profit-after-event → communication link analysis → insider MNPI access confirmation → compliance → SEC/DOJ referral' },
+    { key: 'insiderInfoLeakage', label: 'Insider: Information Leakage', icon: <SecurityIcon />, fn: actoneScenarioInsiderInfoLeakage,
+      desc: 'Small repeated buys detection (gradual accumulation) → pattern clustering (lot size growth, timing, broker splitting) → news event correlation → profit analysis → information source investigation → compliance → SEC/FINRA referral' },
   ];
 
   return (
