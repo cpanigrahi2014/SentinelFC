@@ -2753,6 +2753,8 @@ CAPABILITY_TESTS = [
             {"check": "Scenario: Latency Arbitrage — faster execution vs market data lag detection (sub-100µs round-trip vs 900µs market average) → stale quote exploitation mapping (cross-exchange) → victim impact assessment → infrastructure investigation (co-lo, microwave) → regulatory framework analysis → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Scenario: Order Book Imbalance Exploitation — sudden imbalance creation detection (phantom bid/ask wall) → reversal detection (mass cancel + opposite-side execution) → intent analysis (0% fill rate) → victim impact → historical pattern → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Scenario: Trader Behavior Deviation — new instrument detection (crypto-adjacent sector, 0% historical overlap) → sudden volume increase (3.11x, Z-score 4.8) → trading time shift (pre/after-market, 62% outside normal) → AI behavioral clustering (94.2% dissimilar, anomaly 96/100) → event correlation → compliance review → SEC/FINRA referral", "status": "pass"},
+            {"check": "Scenario: Rogue Trader Detection — limit breach detection (5.72x authorized, 7 breaches in 12 days) → overnight exposure spike ($8.2M→$97M, VaR 23.3x) → unauthorized instruments (92% off-mandate) → control circumvention (account splitting, DMA bypass, P&L manipulation) → loss concealment ($21.6M) → compliance review → SEC/FINRA/DOJ referral", "status": "pass"},
+            {"check": "Scenario: Unusual Profitability — Sharpe ratio spike (1.42→6.84, 4.06σ above peers) → win-rate anomaly (94.2% vs 54.8% peer, 100% on event days) → profit decomposition (7.8x peer avg) → pre-announcement pattern (1-3 days lead) → information source investigation → statistical impossibility (<10^-18) → SEC/FINRA/DOJ referral", "status": "pass"},
             {"check": "Multi-case-type support: AML, Fraud, and Surveillance cases managed in unified platform with type-specific workflows", "status": "pass"},
             {"check": "Case listing with filtering: list all cases with case_id, type, status, priority, assignee, timestamps", "status": "pass"},
             {"check": "Case detail retrieval: full case record including all metadata, timeline, evidence count, comment count, SLA status", "status": "pass"},
@@ -6041,6 +6043,256 @@ async def actone_scenario_trader_behavior_deviation_proxy(current_user=Depends(g
     }
 
 
+@router.post("/admin/data-sources/actone/scenarios/rogue-trader-detection")
+async def actone_scenario_rogue_trader_detection_proxy(current_user=Depends(get_current_user)):
+    """Run Behavioral & AI-Based Anomaly Detection — Rogue Trader Detection scenario end-to-end."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "Behavioral & AI-Based Anomaly Detection — Rogue Trader Detection",
+        "case_id": "ACT-SCEN-RTD-001",
+        "case_type": "surveillance",
+        "final_status": "closed_referred",
+        "priority": "critical",
+        "trader_profile": {
+            "trader_id": "TRD-7821",
+            "name": "Jonathan R. Kessler",
+            "desk": "Fixed Income — Proprietary Trading",
+            "firm": "Atlas Prime Securities",
+            "tenure_years": 6.5,
+            "authorized_limit_usd": 25_000_000,
+            "authorized_instruments": ["US Treasuries", "IG Corporate Bonds", "Agency MBS"],
+            "authorized_hours": "07:00 — 17:00 ET",
+        },
+        "investigation_steps": [
+            {"step": 1, "action": "Limit breach detection",
+             "timestamp": (now - timedelta(hours=8)).isoformat() + "Z",
+             "result": "Trader exceeded authorized position limit of $25M on 7 occasions in 12 days. Peak exposure: $143M in Italian BTP futures (unauthorized instrument class). Used 3 sub-accounts to fragment positions and avoid automated limit checks. Single-account max: $24.8M (just below threshold). Combined real exposure: 5.72x authorized limit.",
+             "limit_breaches": {
+                 "authorized_limit_usd": 25_000_000,
+                 "peak_actual_exposure_usd": 143_000_000,
+                 "exposure_multiple": 5.72,
+                 "breach_count_12_days": 7,
+                 "sub_accounts_used": 3,
+                 "max_single_account_usd": 24_800_000,
+                 "unauthorized_instrument": "Italian BTP Futures",
+                 "fragmentation_detected": True
+             }},
+            {"step": 2, "action": "Overnight exposure spike analysis",
+             "timestamp": (now - timedelta(hours=7, minutes=30)).isoformat() + "Z",
+             "result": "Overnight positions surged from historical avg $8.2M → $97M on 2026-03-12. Trader held $97M in leveraged sovereign debt positions through Asian session (unauthorized). Overnight VaR jumped from $120K → $2.8M (23.3x). Positions were entered after 17:00 ET via direct market access (DMA) bypassing desk controls. 4 consecutive nights with >$50M overnight.",
+             "overnight_analysis": {
+                 "avg_overnight_usd": 8_200_000,
+                 "peak_overnight_usd": 97_000_000,
+                 "overnight_multiplier": 11.8,
+                 "var_normal_usd": 120_000,
+                 "var_peak_usd": 2_800_000,
+                 "var_multiplier": 23.3,
+                 "after_hours_entry": True,
+                 "dma_bypass": True,
+                 "consecutive_nights_over_50m": 4
+             }},
+            {"step": 3, "action": "Unauthorized instrument & strategy detection",
+             "timestamp": (now - timedelta(hours=7)).isoformat() + "Z",
+             "result": "Trader's mandate: US Treasuries, IG Corporate Bonds, Agency MBS. Actual trading: Italian BTP futures (62%), Greek government bonds (18%), Turkish lira FX forwards (12%), authorized instruments (8%). Strategy shifted from relative-value (approved) to directional macro bets (unapproved). Leverage ratio reached 14:1 vs authorized 3:1.",
+             "instrument_violations": {
+                 "authorized_pct": 8,
+                 "italian_btp_pct": 62,
+                 "greek_govt_pct": 18,
+                 "turkish_fx_pct": 12,
+                 "strategy_shift": "relative-value → directional macro",
+                 "actual_leverage": "14:1",
+                 "authorized_leverage": "3:1"
+             }},
+            {"step": 4, "action": "Control circumvention investigation",
+             "timestamp": (now - timedelta(hours=6)).isoformat() + "Z",
+             "result": "Trader exploited multiple control gaps: (1) Split positions across 3 sub-accounts to stay under per-account limit, (2) Entered trades after 17:00 ET when real-time monitoring reduced, (3) Used DMA to bypass order-routing controls, (4) Manually adjusted P&L entries to mask losses on 2 occasions, (5) Delayed trade confirmations by routing through offshore prime broker.",
+             "control_circumvention": {
+                 "account_splitting": True,
+                 "after_hours_exploitation": True,
+                 "dma_bypass": True,
+                 "pnl_manipulation": True,
+                 "pnl_adjustments_count": 2,
+                 "delayed_confirmations": True,
+                 "offshore_routing": "Prime broker — Cayman Islands"
+             }},
+            {"step": 5, "action": "Loss concealment & P&L forensics",
+             "timestamp": (now - timedelta(hours=5)).isoformat() + "Z",
+             "result": "Forensic P&L reconstruction reveals: reported P&L +$3.2M, actual P&L -$18.4M. Trader masked $21.6M in losses through: (1) mis-marking Italian BTP positions by 45bps, (2) booking fictitious offsetting trades in illiquid bonds, (3) delaying loss recognition by rolling losing positions forward. Longest concealment: 8 trading days.",
+             "pnl_forensics": {
+                 "reported_pnl_usd": 3_200_000,
+                 "actual_pnl_usd": -18_400_000,
+                 "concealed_loss_usd": 21_600_000,
+                 "mis_marking_bps": 45,
+                 "fictitious_trades": True,
+                 "loss_rolling": True,
+                 "longest_concealment_days": 8
+             }},
+            {"step": 6, "action": "Compliance review & risk assessment",
+             "timestamp": (now - timedelta(hours=4)).isoformat() + "Z",
+             "result": "Chief Risk Officer confirmed: (1) 7 limit breaches unreported, (2) unauthorized instruments representing 92% of book, (3) leverage 14:1 vs 3:1 authorized, (4) P&L manipulation on 2 occasions, (5) DMA misuse to bypass controls. Total firm exposure at peak: $143M unauthorized. Violations: FINRA Rule 3110, SEC Rule 15c3-1 (net capital), Firm Policy 2.1.3 (trading limits).",
+             "compliance_findings": {
+                 "unreported_breaches": 7,
+                 "unauthorized_instrument_pct": 92,
+                 "leverage_violation": True,
+                 "pnl_manipulation_confirmed": True,
+                 "peak_unauthorized_exposure_usd": 143_000_000,
+                 "regulatory_rules": ["FINRA Rule 3110", "SEC Rule 15c3-1", "Firm Policy 2.1.3", "SOX Section 302"]
+             }},
+            {"step": 7, "action": "Regulatory referral & trader action",
+             "timestamp": (now - timedelta(hours=3)).isoformat() + "Z",
+             "result": "Immediate actions: (1) Trader suspended, all access revoked, (2) Positions unwound over 48 hours (realized loss: $18.4M), (3) Regulatory filings: SEC, FINRA, and FCA (cross-border). Criminal referral to DOJ for fraud (P&L manipulation). Board notification under SOX. All sub-accounts frozen, DMA access terminated firm-wide pending review.",
+             "referral": {
+                 "agencies": ["SEC", "FINRA", "FCA", "DOJ"],
+                 "trader_action": "suspended, access revoked, criminal referral",
+                 "position_unwind_hours": 48,
+                 "realized_loss_usd": 18_400_000,
+                 "board_notification": True,
+                 "firm_wide_dma_review": True
+             }}
+        ],
+        "rogue_trading_summary": {
+            "peak_unauthorized_exposure_usd": 143_000_000,
+            "authorized_limit_usd": 25_000_000,
+            "exposure_multiple": 5.72,
+            "concealed_loss_usd": 21_600_000,
+            "limit_breaches": 7,
+            "overnight_spike_multiple": 11.8,
+            "control_circumventions": 5,
+            "unauthorized_instrument_pct": 92,
+            "days_of_rogue_activity": 12
+        },
+        "total_steps": 7,
+        "total_duration_hours": 5,
+    }
+
+
+@router.post("/admin/data-sources/actone/scenarios/unusual-profitability")
+async def actone_scenario_unusual_profitability_proxy(current_user=Depends(get_current_user)):
+    """Run Behavioral & AI-Based Anomaly Detection — Unusual Profitability scenario end-to-end."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "Behavioral & AI-Based Anomaly Detection — Unusual Profitability",
+        "case_id": "ACT-SCEN-UP-001",
+        "case_type": "surveillance",
+        "final_status": "closed_referred",
+        "priority": "critical",
+        "trader_profile": {
+            "trader_id": "TRD-3156",
+            "name": "Elena V. Marchetti",
+            "desk": "Equities — Event-Driven Strategies",
+            "firm": "Pinnacle Alpha Management",
+            "tenure_years": 4.8,
+            "peer_group": "Event-Driven Equity Traders (N=34)",
+            "peer_avg_annual_return_pct": 12.4,
+            "peer_avg_sharpe_ratio": 1.35,
+        },
+        "investigation_steps": [
+            {"step": 1, "action": "Sharpe ratio spike detection",
+             "timestamp": (now - timedelta(hours=6)).isoformat() + "Z",
+             "result": "Trader's 90-day rolling Sharpe ratio surged from 1.42 (peer-normal) → 6.84 on 2026-03-14. Peer group average: 1.35, peer max: 2.10. Deviation: 4.06 standard deviations above peer mean. Sharpe >4.0 sustained for 18 consecutive trading days — statistically implausible for the strategy type (p < 0.0001).",
+             "sharpe_analysis": {
+                 "trader_sharpe_90d": 6.84,
+                 "trader_sharpe_prior": 1.42,
+                 "peer_avg_sharpe": 1.35,
+                 "peer_max_sharpe": 2.10,
+                 "peer_std_dev": 0.38,
+                 "deviation_from_mean_sigma": 4.06,
+                 "days_above_4": 18,
+                 "p_value": 0.0001,
+                 "strategy_type": "event-driven equity"
+             }},
+            {"step": 2, "action": "Win-rate anomaly analysis",
+             "timestamp": (now - timedelta(hours=5, minutes=30)).isoformat() + "Z",
+             "result": "Over 60 trading days: win rate 94.2% (282 winning / 299 total trades). Peer group avg: 54.8%, peer best: 67.3%. Consecutive winning streak: 41 trades (peer max streak: 12). Win rate on event days (earnings, M&A announcements): 100% (38/38). Every earnings-related position was correctly directional — probability of chance: <0.000001.",
+             "win_rate_analysis": {
+                 "trader_win_rate_pct": 94.2,
+                 "winning_trades": 282,
+                 "total_trades": 299,
+                 "peer_avg_win_rate_pct": 54.8,
+                 "peer_best_win_rate_pct": 67.3,
+                 "consecutive_wins": 41,
+                 "peer_max_streak": 12,
+                 "event_day_win_rate_pct": 100.0,
+                 "event_day_trades": 38,
+                 "probability_of_chance": 0.000001
+             }},
+            {"step": 3, "action": "Profit decomposition & peer comparison",
+             "timestamp": (now - timedelta(hours=5)).isoformat() + "Z",
+             "result": "YTD P&L: $14.8M (trader) vs $1.9M (peer avg). Profit concentration: 72% from 11 event-driven trades executed 1-3 days before announcements. Average profit per event trade: $970K. Non-event trades: performance in-line with peers. Clear bifurcation: extraordinary returns ONLY around corporate events.",
+             "profit_decomposition": {
+                 "trader_ytd_pnl_usd": 14_800_000,
+                 "peer_avg_ytd_pnl_usd": 1_900_000,
+                 "profit_multiple_vs_peer": 7.8,
+                 "event_trade_profit_pct": 72,
+                 "event_trades_count": 11,
+                 "avg_profit_per_event_usd": 970_000,
+                 "days_before_announcement": "1-3",
+                 "non_event_performance": "in-line with peers"
+             }},
+            {"step": 4, "action": "Pre-announcement trade pattern analysis",
+             "timestamp": (now - timedelta(hours=4, minutes=30)).isoformat() + "Z",
+             "result": "Mapped 11 event trades to corporate announcements: all 11 had positions established 1-3 days before public disclosure. Instruments: out-of-the-money options (8), equity (2), CDS (1). Average option delta: 0.15 (deep OTM, high-conviction directional bets). Position sizing 3-5x normal on event trades. Post-announcement: immediate exit within 4 hours of news.",
+             "pre_announcement": {
+                 "trades_before_announcements": 11,
+                 "lead_time_days": "1-3",
+                 "option_trades": 8,
+                 "equity_trades": 2,
+                 "cds_trades": 1,
+                 "avg_option_delta": 0.15,
+                 "position_sizing_multiple": "3-5x",
+                 "avg_exit_time_hours": 4,
+                 "companies": ["Vertex Pharma (FDA approval)", "Cascade Energy (M&A)", "NovaTech (earnings beat)", "Pacific Health (CEO departure)"]
+             }},
+            {"step": 5, "action": "Information source investigation",
+             "timestamp": (now - timedelta(hours=4)).isoformat() + "Z",
+             "result": "Communications review: trader had 47 calls with 3 contacts at advisory firms representing companies in her event trades. Call pattern: consistent spike 2-4 days before each announcement. Personal trading account (disclosed): mirrored 6 of 11 event trades with smaller size. LinkedIn connections: 2 executives at target companies. Social media: deleted posts referencing 'upcoming deals' recovered from cache.",
+             "information_sources": {
+                 "advisory_firm_calls": 47,
+                 "advisory_contacts": 3,
+                 "call_pattern": "spike 2-4 days before announcements",
+                 "personal_account_mirror_trades": 6,
+                 "linkedin_connections_at_targets": 2,
+                 "deleted_social_media_posts": True,
+                 "social_media_content": "references to 'upcoming deals'"
+             }},
+            {"step": 6, "action": "Statistical impossibility assessment",
+             "timestamp": (now - timedelta(hours=3)).isoformat() + "Z",
+             "result": "Quantitative analysis: probability of 38/38 correct event-day directional calls by chance: <1 in 274 billion. Combined anomaly: Sharpe 6.84 + win rate 94.2% + 100% event accuracy + pre-positioning pattern = composite probability <10^-18. Statistical expert report confirms: results inconsistent with any legitimate trading strategy. Strongly indicative of material non-public information (MNPI) usage.",
+             "statistical_assessment": {
+                 "event_accuracy_probability": "<1 in 274 billion",
+                 "composite_probability": "<10^-18",
+                 "expert_conclusion": "inconsistent with legitimate strategy",
+                 "mnpi_indicator": True
+             }},
+            {"step": 7, "action": "Regulatory referral & enforcement",
+             "timestamp": (now - timedelta(hours=2)).isoformat() + "Z",
+             "result": "Package submitted to SEC Enforcement Division and FINRA Market Regulation: statistical impossibility report, trade-level data, communication records (47 advisory calls), personal account mirror trades, social media evidence. Trader suspended, accounts frozen. Parallel criminal referral to DOJ Fraud Section. Estimated illicit profits: $14.8M (firm) + $2.1M (personal).",
+             "referral": {
+                 "agencies": ["SEC Enforcement", "FINRA Market Regulation", "DOJ Fraud Section"],
+                 "evidence_package": ["statistical analysis", "trade data (299 trades)", "communication records", "personal account data", "social media evidence", "expert witness report"],
+                 "trader_action": "suspended, accounts frozen, criminal referral",
+                 "illicit_profits_firm_usd": 14_800_000,
+                 "illicit_profits_personal_usd": 2_100_000,
+                 "total_illicit_profits_usd": 16_900_000
+             }}
+        ],
+        "profitability_summary": {
+            "sharpe_ratio_90d": 6.84,
+            "peer_avg_sharpe": 1.35,
+            "sharpe_deviation_sigma": 4.06,
+            "win_rate_pct": 94.2,
+            "peer_avg_win_rate_pct": 54.8,
+            "event_day_accuracy_pct": 100.0,
+            "ytd_pnl_usd": 14_800_000,
+            "peer_avg_ytd_pnl_usd": 1_900_000,
+            "total_illicit_profits_usd": 16_900_000,
+            "statistical_probability": "<10^-18"
+        },
+        "total_steps": 7,
+        "total_duration_hours": 4,
+    }
+
+
 @router.get("/admin/data-sources/actone/customer360/{customer_id}")
 async def actone_customer360_proxy(customer_id: str, current_user=Depends(get_current_user)):
     """Get Customer 360 view for investigation."""
@@ -7189,6 +7441,24 @@ ALERTS = [
     {"alert_id": "ALT-20412", "alert_type": "trader_behavior_deviation", "severity": "medium", "status": "new", "risk_score": 74, "priority": "medium",
      "customer_id": "TRD-6783", "customer_name": "David R. Chen (Summit Securities)", "description": "Moderate deviation: equity trader began options activity (calls on 4 pharma stocks). Volume 1.6x normal, slightly extended hours. FDA approval calendar correlation detected. Anomaly score 74/100. Needs review",
      "assigned_to": None, "rule_id": "SUR-016", "created_at": "2026-03-17T09:00:00Z", "updated_at": "2026-03-17T09:00:00Z"},
+    {"alert_id": "ALT-20420", "alert_type": "rogue_trader", "severity": "critical", "status": "escalated", "risk_score": 99, "priority": "critical",
+     "customer_id": "TRD-7821", "customer_name": "Jonathan R. Kessler (Atlas Prime Securities)", "description": "Rogue trading: $143M unauthorized exposure (5.72x limit), 92% off-mandate instruments (Italian BTP, Greek govt, Turkish FX), overnight spike $8.2M→$97M, 7 limit breaches in 12 days, $21.6M concealed losses via P&L manipulation, account splitting, DMA bypass",
+     "assigned_to": "USR-001", "rule_id": "SUR-017", "created_at": "2026-03-14T08:00:00Z", "updated_at": "2026-03-18T12:00:00Z"},
+    {"alert_id": "ALT-20421", "alert_type": "rogue_trader", "severity": "high", "status": "assigned", "risk_score": 91, "priority": "high",
+     "customer_id": "TRD-8934", "customer_name": "Patrick D. Morrison (Sterling Capital Group)", "description": "Suspected rogue trading: FX desk trader holding $68M in EM currency positions (authorized limit $15M). Overnight exposures 4.5x normal. Positions fragmented across 2 prime brokers. P&L discrepancy of $4.2M under investigation",
+     "assigned_to": "USR-005", "rule_id": "SUR-017", "created_at": "2026-03-16T10:00:00Z", "updated_at": "2026-03-18T09:00:00Z"},
+    {"alert_id": "ALT-20422", "alert_type": "rogue_trader", "severity": "high", "status": "new", "risk_score": 84, "priority": "high",
+     "customer_id": "TRD-9102", "customer_name": "Sarah J. Whitfield (Meridian Trading LLC)", "description": "Potential limit circumvention: commodities trader split $42M copper futures across 4 sub-accounts (limit $12M each, aggregate $42M vs $15M authorized). After-hours entry pattern. Needs aggregate limit review",
+     "assigned_to": None, "rule_id": "SUR-017", "created_at": "2026-03-17T14:00:00Z", "updated_at": "2026-03-17T14:00:00Z"},
+    {"alert_id": "ALT-20430", "alert_type": "unusual_profitability", "severity": "critical", "status": "escalated", "risk_score": 98, "priority": "critical",
+     "customer_id": "TRD-3156", "customer_name": "Elena V. Marchetti (Pinnacle Alpha Management)", "description": "Abnormal profitability: Sharpe 6.84 (peer avg 1.35, 4.06σ), win rate 94.2% (peer 54.8%), 100% event-day accuracy (38/38), YTD P&L $14.8M (peer avg $1.9M). 11 trades pre-positioned 1-3 days before announcements. Statistical probability <10^-18. MNPI suspected",
+     "assigned_to": "USR-001", "rule_id": "SUR-018", "created_at": "2026-03-12T09:00:00Z", "updated_at": "2026-03-18T11:00:00Z"},
+    {"alert_id": "ALT-20431", "alert_type": "unusual_profitability", "severity": "high", "status": "assigned", "risk_score": 90, "priority": "high",
+     "customer_id": "TRD-4287", "customer_name": "Richard H. Blackwell (Orion Capital Advisors)", "description": "Profit anomaly: 60-day Sharpe 4.92 (peer avg 1.28). Win rate 87% on options trades around M&A announcements. $6.4M YTD vs $1.6M peer avg. 7 trades within 48hrs of deal announcements. Communications review pending",
+     "assigned_to": "USR-003", "rule_id": "SUR-018", "created_at": "2026-03-14T11:00:00Z", "updated_at": "2026-03-17T15:00:00Z"},
+    {"alert_id": "ALT-20432", "alert_type": "unusual_profitability", "severity": "medium", "status": "new", "risk_score": 76, "priority": "medium",
+     "customer_id": "TRD-5610", "customer_name": "Anya K. Petrov (Zenith Securities)", "description": "Moderate profit anomaly: 90-day Sharpe 3.21 (peer max 2.10). Win rate 78% concentrated in biotech sector around FDA decisions. $3.8M YTD (peer avg $1.4M). Could be skill vs information advantage — needs deeper analysis",
+     "assigned_to": None, "rule_id": "SUR-018", "created_at": "2026-03-16T08:00:00Z", "updated_at": "2026-03-16T08:00:00Z"},
 ]
 
 

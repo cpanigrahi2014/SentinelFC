@@ -245,6 +245,10 @@ export const actoneScenarioOrderBookImbalance = () =>
   api.post('/api/admin/data-sources/actone/scenarios/order-book-imbalance');
 export const actoneScenarioTraderBehaviorDeviation = () =>
   api.post('/api/admin/data-sources/actone/scenarios/trader-behavior-deviation');
+export const actoneScenarioRogueTrader = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/rogue-trader-detection');
+export const actoneScenarioUnusualProfitability = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/unusual-profitability');
 export const getActoneCustomer360 = (customerId) =>
   api.get(`/api/admin/data-sources/actone/customer360/${customerId}`);
 export const getActoneStateMachine = () =>

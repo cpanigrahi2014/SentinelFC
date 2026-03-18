@@ -27,7 +27,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation, actoneScenarioRogueTrader, actoneScenarioUnusualProfitability,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -512,6 +512,10 @@ function ScenariosTab() {
       desc: 'Sudden imbalance creation (phantom bid/ask wall) → reversal detection (mass cancel + opposite execution) → intent analysis (0% fill rate) → victim impact → 30-day pattern history → compliance → SEC/FINRA referral' },
     { key: 'traderBehaviorDeviation', label: 'Trader Behavior Deviation', icon: <TrendingUpIcon />, fn: actoneScenarioTraderBehaviorDeviation,
       desc: 'New instrument detection (0% historical overlap) → sudden volume increase (3.11x, Z-score 4.8) → trading time shift (62% outside normal hours) → AI behavioral clustering (94.2% dissimilar, anomaly 96/100) → event correlation → compliance → SEC/FINRA referral' },
+    { key: 'rogueTrader', label: 'Rogue Trader Detection', icon: <WarningAmberIcon />, fn: actoneScenarioRogueTrader,
+      desc: 'Limit breach detection (5.72x authorized, 7 breaches) → overnight exposure spike ($8.2M→$97M) → unauthorized instruments (92% off-mandate) → control circumvention (account splitting, DMA bypass) → loss concealment ($21.6M) → compliance → SEC/FINRA/DOJ referral' },
+    { key: 'unusualProfitability', label: 'Unusual Profitability Detection', icon: <TrendingUpIcon />, fn: actoneScenarioUnusualProfitability,
+      desc: 'Sharpe ratio spike (6.84 vs 1.35 peer, 4.06σ) → win-rate anomaly (94.2% vs 54.8% peer, 100% on event days) → profit decomposition (7.8x peer) → pre-announcement pattern → information source investigation → statistical impossibility (<10^-18) → SEC/FINRA/DOJ referral' },
   ];
 
   return (
