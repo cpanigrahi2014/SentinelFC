@@ -27,7 +27,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -486,6 +486,8 @@ function ScenariosTab() {
       desc: 'Pattern detection (order-to-trade ratio, cancel time, BBO distance) → order book reconstruction → trader profiling (algo vs human) → market impact → edge cases (partial fills) → compliance → SEC/FINRA referral' },
     { key: 'washTrading', label: 'Wash Trading Detection', icon: <TrendingUpIcon />, fn: actoneScenarioWashTrading,
       desc: 'Self-trade detection (same beneficial owner, same IP/device, circular trades) → ownership analysis → IP/device correlation → circular chain reconstruction → volume impact → compliance → SEC/FINRA referral' },
+    { key: 'pumpAndDump', label: 'Pump and Dump Detection', icon: <TrendingUpIcon />, fn: actoneScenarioPumpAndDump,
+      desc: 'Price/volume anomaly → social sentiment analysis (bots, fake press releases) → accumulation pattern → insider selling correlation (late Form 4) → dump & collapse → compliance → SEC/FINRA referral' },
   ];
 
   return (

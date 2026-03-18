@@ -2740,6 +2740,7 @@ CAPABILITY_TESTS = [
             {"check": "Scenario: Trading Surveillance — suspicious trade alert → triage → assign compliance analyst → communication review → escalate to senior compliance → approval → regulatory referral", "status": "pass"},
             {"check": "Scenario: Spoofing/Layering — pattern detection (order-to-trade ratio, cancel time, BBO distance) → order book reconstruction → trader profiling (algo vs human) → market impact analysis → edge case evaluation (partial fills) → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Scenario: Wash Trading — self-trade detection (same beneficial owner, same IP/device, circular trades) → beneficial ownership analysis → IP/device correlation → circular trade reconstruction → volume impact analysis → compliance review → SEC/FINRA referral", "status": "pass"},
+            {"check": "Scenario: Pump and Dump — price/volume anomaly detection → social/news sentiment analysis (NLP bot detection, fake press releases) → accumulation pattern reconstruction → insider selling correlation (late Form 4 filings) → dump & collapse analysis → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Multi-case-type support: AML, Fraud, and Surveillance cases managed in unified platform with type-specific workflows", "status": "pass"},
             {"check": "Case listing with filtering: list all cases with case_id, type, status, priority, assignee, timestamps", "status": "pass"},
             {"check": "Case detail retrieval: full case record including all metadata, timeline, evidence count, comment count, SLA status", "status": "pass"},
@@ -4745,6 +4746,113 @@ async def actone_scenario_wash_trading_proxy(current_user=Depends(get_current_us
     }
 
 
+@router.post("/admin/data-sources/actone/scenarios/pump-and-dump")
+async def actone_scenario_pump_and_dump_proxy(current_user=Depends(get_current_user)):
+    """Run Pump and Dump surveillance scenario end-to-end."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "Trading Surveillance — Pump and Dump Detection",
+        "case_id": "ACT-SCEN-PND-001",
+        "case_type": "surveillance",
+        "final_status": "closed_referred",
+        "priority": "critical",
+        "detection_metrics": {
+            "symbol": "XYZP",
+            "exchange": "OTC Pink Sheets",
+            "accumulation_window_days": 18,
+            "shares_accumulated": 2_400_000,
+            "avg_accumulation_price": 0.32,
+            "price_at_peak": 4.85,
+            "price_increase_pct": 1415.6,
+            "volume_spike_pct": 8420.0,
+            "avg_daily_volume_before": 12_500,
+            "peak_daily_volume": 1_065_000,
+            "dump_shares_sold": 2_150_000,
+            "dump_proceeds_usd": 8_730_000,
+            "social_media_posts_detected": 47,
+            "fake_press_releases": 2,
+            "insider_sell_filings_late": 3,
+            "retail_victims_estimated": 340,
+        },
+        "timeline_evidence": [
+            {"phase": "accumulation", "date_range": f"{(now - timedelta(days=35)).strftime('%Y-%m-%d')} to {(now - timedelta(days=17)).strftime('%Y-%m-%d')}",
+             "detail": "Subject acquired 2.4M shares of XYZP via 42 small block purchases across 3 brokerage accounts at avg $0.32/share. Total cost $768K",
+             "accounts": ["BRK-ACC-501", "BRK-ACC-502", "BRK-ACC-503"]},
+            {"phase": "promotion", "date_range": f"{(now - timedelta(days=16)).strftime('%Y-%m-%d')} to {(now - timedelta(days=8)).strftime('%Y-%m-%d')}",
+             "detail": "47 social media posts across Reddit (r/pennystocks), Twitter/X, StockTwits promoting XYZP. 2 fake press releases claiming FDA approval. Paid newsletter blast to 85K subscribers",
+             "social_accounts": ["@penny_rocket_99", "@biotech_alpha", "StockTwits:XYZPbull"],
+             "press_releases": [{"title": "XYZP Receives Fast-Track FDA Designation", "source": "PRNewswire (paid)", "verified": False},
+                                {"title": "XYZP Phase 3 Results Exceed Expectations", "source": "GlobeNewswire (paid)", "verified": False}]},
+            {"phase": "price_spike", "date_range": f"{(now - timedelta(days=10)).strftime('%Y-%m-%d')} to {(now - timedelta(days=5)).strftime('%Y-%m-%d')}",
+             "detail": "XYZP price rose from $0.38 to $4.85 (+1,176%) over 5 trading days. Volume surged from 12.5K to 1.065M shares/day (+8,420%)",
+             "daily_prices": [
+                 {"date": (now - timedelta(days=10)).strftime('%Y-%m-%d'), "open": 0.38, "high": 0.72, "close": 0.68, "volume": 185_000},
+                 {"date": (now - timedelta(days=9)).strftime('%Y-%m-%d'), "open": 0.71, "high": 1.45, "close": 1.32, "volume": 420_000},
+                 {"date": (now - timedelta(days=8)).strftime('%Y-%m-%d'), "open": 1.35, "high": 2.80, "close": 2.65, "volume": 680_000},
+                 {"date": (now - timedelta(days=7)).strftime('%Y-%m-%d'), "open": 2.70, "high": 4.20, "close": 3.95, "volume": 890_000},
+                 {"date": (now - timedelta(days=6)).strftime('%Y-%m-%d'), "open": 4.00, "high": 4.85, "close": 4.60, "volume": 1_065_000},
+             ]},
+            {"phase": "dump", "date_range": f"{(now - timedelta(days=5)).strftime('%Y-%m-%d')} to {(now - timedelta(days=3)).strftime('%Y-%m-%d')}",
+             "detail": "Subject sold 2.15M shares across 3 accounts over 2 days at avg $4.06. Proceeds $8.73M. Price collapsed to $0.52 within 48h after dump completed",
+             "sell_orders": [
+                 {"date": (now - timedelta(days=5)).strftime('%Y-%m-%d'), "account": "BRK-ACC-501", "shares": 800_000, "avg_price": 4.35, "proceeds": 3_480_000},
+                 {"date": (now - timedelta(days=4)).strftime('%Y-%m-%d'), "account": "BRK-ACC-502", "shares": 750_000, "avg_price": 3.90, "proceeds": 2_925_000},
+                 {"date": (now - timedelta(days=3)).strftime('%Y-%m-%d'), "account": "BRK-ACC-503", "shares": 600_000, "avg_price": 3.88, "proceeds": 2_325_000},
+             ]},
+            {"phase": "collapse", "date_range": f"{(now - timedelta(days=3)).strftime('%Y-%m-%d')} to {(now - timedelta(days=1)).strftime('%Y-%m-%d')}",
+             "detail": "Price collapsed $4.60 → $0.52 (-88.7%). Estimated 340 retail investors lost combined $6.2M. Social media promotion ceased immediately after dump"},
+        ],
+        "insider_activity": [
+            {"insider": "Derek Simmons (CEO)", "filing": "Form 4 (late)", "action": "SELL",
+             "shares": 500_000, "price": 4.10, "date": (now - timedelta(days=5)).strftime('%Y-%m-%d'),
+             "filing_date": (now - timedelta(days=2)).strftime('%Y-%m-%d'), "days_late": 3,
+             "note": "Filed 3 days late. Sold at peak before collapse"},
+            {"insider": "Rachel Tong (CFO)", "filing": "Form 4 (late)", "action": "SELL",
+             "shares": 300_000, "price": 3.95, "date": (now - timedelta(days=4)).strftime('%Y-%m-%d'),
+             "filing_date": (now - timedelta(days=1)).strftime('%Y-%m-%d'), "days_late": 3,
+             "note": "Filed 3 days late. Sold day after CEO"},
+            {"insider": "Jason Blake (Director)", "filing": "Form 4 (late)", "action": "SELL",
+             "shares": 200_000, "price": 4.20, "date": (now - timedelta(days=5)).strftime('%Y-%m-%d'),
+             "filing_date": (now - timedelta(days=1)).strftime('%Y-%m-%d'), "days_late": 4,
+             "note": "Filed 4 days late. Same-day sale as CEO"},
+        ],
+        "sentiment_analysis": {
+            "social_media_spike": {"baseline_mentions_per_day": 3, "peak_mentions_per_day": 285, "spike_pct": 9400},
+            "sentiment_before_promotion": {"positive": 0.12, "neutral": 0.75, "negative": 0.13},
+            "sentiment_during_promotion": {"positive": 0.89, "neutral": 0.08, "negative": 0.03},
+            "coordinated_posting": True,
+            "bot_accounts_detected": 8,
+            "paid_promoters_identified": 3,
+        },
+        "steps": [
+            {"step": 1, "action": "price_volume_anomaly_detection",
+             "result": "Surveillance flagged XYZP: price +1,415% and volume +8,420% vs 30-day baseline. OTC microcap with no material corporate events on EDGAR",
+             "status_after": "triaged", "timestamp": (now - timedelta(hours=48)).isoformat()},
+            {"step": 2, "action": "social_sentiment_analysis",
+             "result": "NLP scan detected 47 promotional posts across 3 platforms. 8 bot accounts, 3 paid promoters. Sentiment spike from 12% to 89% positive. 2 unverified press releases found",
+             "status_after": "evidence_gathering", "timestamp": (now - timedelta(hours=44)).isoformat()},
+            {"step": 3, "action": "accumulation_pattern_analysis",
+             "result": "Trade reconstruction: 2.4M shares accumulated via 42 block purchases across BRK-ACC-501/502/503 (same beneficial owner: Victor Reyes). Avg price $0.32 over 18 days",
+             "status_after": "evidence_gathering", "timestamp": (now - timedelta(hours=40)).isoformat()},
+            {"step": 4, "action": "insider_selling_correlation",
+             "result": "3 insiders (CEO, CFO, Director) sold combined 1M shares at peak ($4.08 avg). All Form 4 filings 3-4 days late. Selling coincides with promotion window",
+             "status_after": "in_investigation", "timestamp": (now - timedelta(hours=32)).isoformat()},
+            {"step": 5, "action": "dump_and_collapse_analysis",
+             "result": "Subject dumped 2.15M shares over 2 days ($8.73M proceeds). Price collapsed 88.7% within 48h. Social promotion ceased immediately. Est. 340 retail victims, $6.2M losses",
+             "status_after": "escalated", "timestamp": (now - timedelta(hours=24)).isoformat()},
+            {"step": 6, "action": "compliance_review",
+             "result": "Senior Market Surveillance confirmed Securities Exchange Act §9(a)(2) market manipulation + §10(b)/Rule 10b-5 fraud. Late Form 4 filings = additional §16(a) violations",
+             "status_after": "pending_approval", "timestamp": (now - timedelta(hours=12)).isoformat()},
+            {"step": 7, "action": "regulatory_referral",
+             "result": "Referred to SEC Enforcement Division + FINRA Market Regulation. Trading halt requested on XYZP. Subject accounts frozen. Evidence package: trade logs, social media archives, Form 4 filings, price/volume data",
+             "status_after": "closed_referred", "timestamp": (now - timedelta(hours=4)).isoformat()},
+        ],
+        "evidence_count": 14,
+        "timeline_entries": 22,
+        "total_duration_hours": 44,
+    }
+
+
 @router.get("/admin/data-sources/actone/customer360/{customer_id}")
 async def actone_customer360_proxy(customer_id: str, current_user=Depends(get_current_user)):
     """Get Customer 360 view for investigation."""
@@ -5776,6 +5884,15 @@ ALERTS = [
     {"alert_id": "ALT-20282", "alert_type": "wash_trading", "severity": "high", "status": "new", "risk_score": 82, "priority": "high",
      "customer_id": "TDR-UBO-GRP7", "customer_name": "Sigma Trading Group (4 linked accounts)", "description": "Circular trade pattern: A→B→C→D→A on AMZN over 6h, net zero positions, volume inflated 6.2%. Beneficial ownership under review",
      "assigned_to": None, "rule_id": "SUR-003", "created_at": "2026-03-18T06:00:00Z", "updated_at": "2026-03-18T06:00:00Z"},
+    {"alert_id": "ALT-20290", "alert_type": "pump_and_dump", "severity": "critical", "status": "escalated", "risk_score": 97, "priority": "critical",
+     "customer_id": "TDR-PND-REYES", "customer_name": "Victor Reyes (BRK-ACC-501/502/503)", "description": "Pump and dump: XYZP price +1,415%, volume +8,420%. 2.4M shares accumulated at $0.32, dumped at $4.06 avg. 47 social media posts, 2 fake press releases, 3 late insider Form 4 filings. Est. 340 retail victims, $6.2M losses",
+     "assigned_to": "USR-005", "rule_id": "SUR-004", "created_at": "2026-03-16T08:00:00Z", "updated_at": "2026-03-18T10:00:00Z"},
+    {"alert_id": "ALT-20291", "alert_type": "pump_and_dump", "severity": "high", "status": "assigned", "risk_score": 88, "priority": "high",
+     "customer_id": "TDR-PND-MORALES", "customer_name": "Elena Morales (Coastal Ventures Fund)", "description": "Suspected pump & dump: QBIO price +640% in 3 days. Subject accumulated 1.1M shares prior. Coordinated StockTwits/Reddit campaign detected (12 bot accounts). Selling began at peak",
+     "assigned_to": "USR-003", "rule_id": "SUR-004", "created_at": "2026-03-17T11:00:00Z", "updated_at": "2026-03-18T07:00:00Z"},
+    {"alert_id": "ALT-20292", "alert_type": "pump_and_dump", "severity": "high", "status": "new", "risk_score": 84, "priority": "high",
+     "customer_id": "TDR-PND-GRP12", "customer_name": "NovaTech Holdings (3 linked accounts)", "description": "Potential pump: NVTK price +380%, volume +3,200% with no EDGAR filings. 2 insider sales at peak, both Form 4 filed late. Social media promotion campaign under analysis",
+     "assigned_to": None, "rule_id": "SUR-004", "created_at": "2026-03-18T09:00:00Z", "updated_at": "2026-03-18T09:00:00Z"},
 ]
 
 
