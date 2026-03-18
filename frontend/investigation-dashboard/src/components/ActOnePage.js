@@ -27,7 +27,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -488,6 +488,8 @@ function ScenariosTab() {
       desc: 'Self-trade detection (same beneficial owner, same IP/device, circular trades) → ownership analysis → IP/device correlation → circular chain reconstruction → volume impact → compliance → SEC/FINRA referral' },
     { key: 'pumpAndDump', label: 'Pump and Dump Detection', icon: <TrendingUpIcon />, fn: actoneScenarioPumpAndDump,
       desc: 'Price/volume anomaly → social sentiment analysis (bots, fake press releases) → accumulation pattern → insider selling correlation (late Form 4) → dump & collapse → compliance → SEC/FINRA referral' },
+    { key: 'markingTheClose', label: 'Marking the Close', icon: <TrendingUpIcon />, fn: actoneScenarioMarkingTheClose,
+      desc: 'Closing window anomaly (large trades in last 5–10 min) → VWAP deviation analysis → trade pattern reconstruction → portfolio NAV impact → historical quarter-end pattern → compliance → SEC/FINRA referral' },
   ];
 
   return (

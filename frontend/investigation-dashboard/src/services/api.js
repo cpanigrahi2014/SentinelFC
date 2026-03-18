@@ -221,6 +221,8 @@ export const actoneScenarioWashTrading = () =>
   api.post('/api/admin/data-sources/actone/scenarios/wash-trading');
 export const actoneScenarioPumpAndDump = () =>
   api.post('/api/admin/data-sources/actone/scenarios/pump-and-dump');
+export const actoneScenarioMarkingTheClose = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/marking-the-close');
 export const getActoneCustomer360 = (customerId) =>
   api.get(`/api/admin/data-sources/actone/customer360/${customerId}`);
 export const getActoneStateMachine = () =>
