@@ -3569,6 +3569,8 @@ export default function DataSources() {
   const [metricsLoading, setMetricsLoading] = useState(false);
   const [inventoryData, setInventoryData] = useState(null);
   const [inventoryLoading, setInventoryLoading] = useState(false);
+  const [capabilitiesData, setCapabilitiesData] = useState(null);
+  const [capabilitiesLoading, setCapabilitiesLoading] = useState(false);
 
   const EXPECTED_CATEGORIES = [
     'Core Banking',
@@ -3687,6 +3689,7 @@ export default function DataSources() {
           <Tab icon={<RocketLaunchIcon />} iconPosition="start" label="Pipeline Test" />
           <Tab icon={<MonitorHeartIcon />} iconPosition="start" label="Monitoring" />
           <Tab icon={<DescriptionIcon />} iconPosition="start" label="Documentation" />
+          <Tab icon={<SecurityIcon />} iconPosition="start" label="Capabilities" />
         </Tabs>
       </Paper>
 
@@ -4082,6 +4085,16 @@ export default function DataSources() {
           inventoryLoading={inventoryLoading}
           setInventoryData={setInventoryData}
           setInventoryLoading={setInventoryLoading}
+        />
+      )}
+
+      {/* ===================== TAB 8: Capabilities ===================== */}
+      {activeTab === 8 && (
+        <CapabilitiesTab
+          capabilitiesData={capabilitiesData}
+          capabilitiesLoading={capabilitiesLoading}
+          setCapabilitiesData={setCapabilitiesData}
+          setCapabilitiesLoading={setCapabilitiesLoading}
         />
       )}
 
