@@ -2739,6 +2739,7 @@ CAPABILITY_TESTS = [
             {"check": "Scenario: Fraud Case — fraud alert → triage (critical) → assign → freeze account → contact customer → evidence collection → closed (no_action or referred)", "status": "pass"},
             {"check": "Scenario: Trading Surveillance — suspicious trade alert → triage → assign compliance analyst → communication review → escalate to senior compliance → approval → regulatory referral", "status": "pass"},
             {"check": "Scenario: Spoofing/Layering — pattern detection (order-to-trade ratio, cancel time, BBO distance) → order book reconstruction → trader profiling (algo vs human) → market impact analysis → edge case evaluation (partial fills) → compliance review → SEC/FINRA referral", "status": "pass"},
+            {"check": "Scenario: Wash Trading — self-trade detection (same beneficial owner, same IP/device, circular trades) → beneficial ownership analysis → IP/device correlation → circular trade reconstruction → volume impact analysis → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Multi-case-type support: AML, Fraud, and Surveillance cases managed in unified platform with type-specific workflows", "status": "pass"},
             {"check": "Case listing with filtering: list all cases with case_id, type, status, priority, assignee, timestamps", "status": "pass"},
             {"check": "Case detail retrieval: full case record including all metadata, timeline, evidence count, comment count, SLA status", "status": "pass"},
@@ -4650,6 +4651,100 @@ async def actone_scenario_spoofing_layering_proxy(current_user=Depends(get_curre
     }
 
 
+@router.post("/admin/data-sources/actone/scenarios/wash-trading")
+async def actone_scenario_wash_trading_proxy(current_user=Depends(get_current_user)):
+    """Run Wash Trading surveillance scenario end-to-end."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "Trading Surveillance — Wash Trading Detection",
+        "case_id": "ACT-SCEN-WSH-001",
+        "case_type": "surveillance",
+        "final_status": "closed_referred",
+        "priority": "critical",
+        "detection_metrics": {
+            "matched_self_trades": 34,
+            "total_trades_analyzed": 412,
+            "self_trade_pct": 8.25,
+            "colluding_accounts_identified": 3,
+            "shared_beneficial_owner": True,
+            "shared_ip_addresses": 2,
+            "shared_device_fingerprints": 1,
+            "circular_trade_chains": 5,
+            "circular_chain_avg_length": 3.4,
+            "volume_inflated_pct": 14.7,
+            "symbols_affected": ["NVDA", "MSTR"],
+            "total_wash_volume_usd": 4_280_000,
+            "detection_window_hours": 72,
+        },
+        "wash_trade_evidence": [
+            {"time": (now - timedelta(hours=48, minutes=12)).isoformat(), "symbol": "NVDA",
+             "buy_account": "ACC-TDR-101", "sell_account": "ACC-TDR-205", "qty": 5000, "price": 142.30,
+             "beneficial_owner": "Marcus Hale", "match_type": "same_beneficial_owner",
+             "ip_buy": "198.51.100.14", "ip_sell": "198.51.100.14", "ip_match": True},
+            {"time": (now - timedelta(hours=46, minutes=33)).isoformat(), "symbol": "NVDA",
+             "buy_account": "ACC-TDR-205", "sell_account": "ACC-TDR-310", "qty": 5000, "price": 143.10,
+             "beneficial_owner": "Marcus Hale", "match_type": "circular_trade",
+             "ip_buy": "198.51.100.14", "ip_sell": "203.0.113.22", "ip_match": False,
+             "device_fingerprint_match": True},
+            {"time": (now - timedelta(hours=44, minutes=5)).isoformat(), "symbol": "NVDA",
+             "buy_account": "ACC-TDR-310", "sell_account": "ACC-TDR-101", "qty": 5000, "price": 144.50,
+             "beneficial_owner": "Marcus Hale", "match_type": "circular_chain_complete",
+             "ip_buy": "203.0.113.22", "ip_sell": "198.51.100.14", "ip_match": False,
+             "note": "Circular chain: 101→205→310→101 over 4h7m, net zero position, price inflated $2.20"},
+            {"time": (now - timedelta(hours=40)).isoformat(), "symbol": "MSTR",
+             "buy_account": "ACC-TDR-101", "sell_account": "ACC-TDR-101", "qty": 2000, "price": 318.75,
+             "beneficial_owner": "Marcus Hale", "match_type": "self_trade_same_account",
+             "ip_buy": "198.51.100.14", "ip_sell": "198.51.100.14", "ip_match": True,
+             "note": "Literal self-trade: buy and sell from same account, same second"},
+            {"time": (now - timedelta(hours=36, minutes=15)).isoformat(), "symbol": "NVDA",
+             "buy_account": "ACC-TDR-205", "sell_account": "ACC-TDR-101", "qty": 8000, "price": 146.20,
+             "beneficial_owner": "Marcus Hale", "match_type": "same_device",
+             "device_id": "DEV-A7F3B2", "device_fingerprint_match": True,
+             "note": "Trades executed from same device fingerprint across different accounts"},
+        ],
+        "account_network": {
+            "primary_trader": "Marcus Hale",
+            "accounts": [
+                {"account_id": "ACC-TDR-101", "name": "Hale Capital LLC", "type": "institutional",
+                 "beneficial_owner": "Marcus Hale", "ownership_pct": 95},
+                {"account_id": "ACC-TDR-205", "name": "Pinnacle Investments Ltd", "type": "institutional",
+                 "beneficial_owner": "Marcus Hale", "ownership_pct": 100},
+                {"account_id": "ACC-TDR-310", "name": "Clearwater Trading Corp", "type": "institutional",
+                 "beneficial_owner": "Hale Capital LLC → Marcus Hale (indirect)", "ownership_pct": 80},
+            ],
+            "shared_ips": ["198.51.100.14", "203.0.113.22"],
+            "shared_devices": ["DEV-A7F3B2"],
+            "relationship_graph": "Hale (direct owner) → ACC-101 + ACC-205 | Hale Capital LLC → ACC-310 (indirect)",
+        },
+        "steps": [
+            {"step": 1, "action": "self_trade_detection",
+             "result": "Surveillance engine flagged 34 self-trades across 3 accounts linked to same beneficial owner Marcus Hale. 8.25% self-trade ratio (threshold: 2%)",
+             "status_after": "triaged", "timestamp": (now - timedelta(hours=24)).isoformat()},
+            {"step": 2, "action": "beneficial_ownership_analysis",
+             "result": "CDD/KYC records confirm Marcus Hale is UBO of all 3 accounts (ACC-TDR-101 95%, ACC-TDR-205 100%, ACC-TDR-310 80% via Hale Capital LLC)",
+             "status_after": "evidence_gathering", "timestamp": (now - timedelta(hours=22)).isoformat()},
+            {"step": 3, "action": "ip_device_correlation",
+             "result": "2 shared IP addresses (198.51.100.14, 203.0.113.22) and 1 shared device fingerprint (DEV-A7F3B2) across accounts. 68% of cross-account trades from same IP",
+             "status_after": "evidence_gathering", "timestamp": (now - timedelta(hours=20)).isoformat()},
+            {"step": 4, "action": "circular_trade_reconstruction",
+             "result": "5 circular trade chains identified: ACC-101→ACC-205→ACC-310→ACC-101. Average chain duration 4h, net position zero, price inflated $2.20-$4.50 per cycle",
+             "status_after": "in_investigation", "timestamp": (now - timedelta(hours=16)).isoformat()},
+            {"step": 5, "action": "volume_impact_analysis",
+             "result": "Wash trades inflated reported volume by 14.7% on NVDA and 9.3% on MSTR over 72h window. $4.28M total artificial volume. NBBO impacted on 3 occasions",
+             "status_after": "escalated", "timestamp": (now - timedelta(hours=12)).isoformat()},
+            {"step": 6, "action": "compliance_review",
+             "result": "Head of Market Surveillance confirmed Section 9(a)(1) Securities Exchange Act / FINRA Rule 6140 violation. Pre-arranged trades to inflate volume",
+             "status_after": "pending_approval", "timestamp": (now - timedelta(hours=6)).isoformat()},
+            {"step": 7, "action": "regulatory_referral",
+             "result": "Referred to SEC Enforcement & FINRA Market Regulation. All 3 accounts frozen. Evidence package: trade logs, UBO records, IP/device correlation, circular chain diagram",
+             "status_after": "closed_referred", "timestamp": (now - timedelta(hours=2)).isoformat()},
+        ],
+        "evidence_count": 11,
+        "timeline_entries": 18,
+        "total_duration_hours": 22,
+    }
+
+
 @router.get("/admin/data-sources/actone/customer360/{customer_id}")
 async def actone_customer360_proxy(customer_id: str, current_user=Depends(get_current_user)):
     """Get Customer 360 view for investigation."""
@@ -5672,6 +5767,15 @@ ALERTS = [
     {"alert_id": "ALT-20272", "alert_type": "spoofing_layering", "severity": "high", "status": "new", "risk_score": 85, "priority": "high",
      "customer_id": "TDR-ALGO-087", "customer_name": "Velocity Capital Partners (ALGO-MM-087)", "description": "Potential spoofing vs legitimate market-making: order-to-trade ratio 18.2 (threshold 10), but 60% orders within 0.3% of BBO. Needs manual review",
      "assigned_to": None, "rule_id": "SUR-001", "created_at": "2026-03-17T16:00:00Z", "updated_at": "2026-03-17T16:00:00Z"},
+    {"alert_id": "ALT-20280", "alert_type": "wash_trading", "severity": "critical", "status": "escalated", "risk_score": 94, "priority": "critical",
+     "customer_id": "TDR-UBO-HALE", "customer_name": "Marcus Hale (Hale Capital / Pinnacle / Clearwater)", "description": "Wash trading: 34 self-trades across 3 accounts sharing beneficial owner, 2 IPs, 1 device. 5 circular chains (101→205→310→101). Volume inflated 14.7% on NVDA",
+     "assigned_to": "USR-005", "rule_id": "SUR-003", "created_at": "2026-03-17T10:00:00Z", "updated_at": "2026-03-18T08:00:00Z"},
+    {"alert_id": "ALT-20281", "alert_type": "wash_trading", "severity": "high", "status": "assigned", "risk_score": 87, "priority": "high",
+     "customer_id": "TDR-UBO-CHEN", "customer_name": "Wei Chen (Dragon Fund / Eastern Capital)", "description": "Suspected wash trading: 12 matched trades between 2 accounts with same IP address 10.0.8.55. Both accounts opened same week, same device fingerprint",
+     "assigned_to": "USR-003", "rule_id": "SUR-003", "created_at": "2026-03-16T14:00:00Z", "updated_at": "2026-03-17T11:00:00Z"},
+    {"alert_id": "ALT-20282", "alert_type": "wash_trading", "severity": "high", "status": "new", "risk_score": 82, "priority": "high",
+     "customer_id": "TDR-UBO-GRP7", "customer_name": "Sigma Trading Group (4 linked accounts)", "description": "Circular trade pattern: A→B→C→D→A on AMZN over 6h, net zero positions, volume inflated 6.2%. Beneficial ownership under review",
+     "assigned_to": None, "rule_id": "SUR-003", "created_at": "2026-03-18T06:00:00Z", "updated_at": "2026-03-18T06:00:00Z"},
 ]
 
 

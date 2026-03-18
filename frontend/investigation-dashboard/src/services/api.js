@@ -217,6 +217,8 @@ export const actoneScenarioSurveillance = () =>
   api.post('/api/admin/data-sources/actone/scenarios/surveillance');
 export const actoneScenarioSpoofingLayering = () =>
   api.post('/api/admin/data-sources/actone/scenarios/spoofing-layering');
+export const actoneScenarioWashTrading = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/wash-trading');
 export const getActoneCustomer360 = (customerId) =>
   api.get(`/api/admin/data-sources/actone/customer360/${customerId}`);
 export const getActoneStateMachine = () =>
