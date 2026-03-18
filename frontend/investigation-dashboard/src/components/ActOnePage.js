@@ -27,7 +27,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -510,6 +510,8 @@ function ScenariosTab() {
       desc: 'Faster execution vs market data lag (40µs vs 900µs) → stale quote exploitation mapping → victim impact (MM + institutional + retail) → infrastructure investigation (co-lo, microwave) → compliance → SEC/FINRA referral' },
     { key: 'orderBookImbalance', label: 'Order Book Imbalance Exploitation', icon: <SecurityIcon />, fn: actoneScenarioOrderBookImbalance,
       desc: 'Sudden imbalance creation (phantom bid/ask wall) → reversal detection (mass cancel + opposite execution) → intent analysis (0% fill rate) → victim impact → 30-day pattern history → compliance → SEC/FINRA referral' },
+    { key: 'traderBehaviorDeviation', label: 'Trader Behavior Deviation', icon: <TrendingUpIcon />, fn: actoneScenarioTraderBehaviorDeviation,
+      desc: 'New instrument detection (0% historical overlap) → sudden volume increase (3.11x, Z-score 4.8) → trading time shift (62% outside normal hours) → AI behavioral clustering (94.2% dissimilar, anomaly 96/100) → event correlation → compliance → SEC/FINRA referral' },
   ];
 
   return (

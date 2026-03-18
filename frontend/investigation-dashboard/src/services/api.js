@@ -243,6 +243,8 @@ export const actoneScenarioLatencyArbitrage = () =>
   api.post('/api/admin/data-sources/actone/scenarios/latency-arbitrage');
 export const actoneScenarioOrderBookImbalance = () =>
   api.post('/api/admin/data-sources/actone/scenarios/order-book-imbalance');
+export const actoneScenarioTraderBehaviorDeviation = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/trader-behavior-deviation');
 export const getActoneCustomer360 = (customerId) =>
   api.get(`/api/admin/data-sources/actone/customer360/${customerId}`);
 export const getActoneStateMachine = () =>

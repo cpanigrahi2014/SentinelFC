@@ -2752,6 +2752,7 @@ CAPABILITY_TESTS = [
             {"check": "Scenario: Momentum Ignition — burst trade detection (aggressive orders → price spike) → momentum cascade analysis (stop-losses, algo triggers, retail FOMO) → profit exit timing (sell at peak) → price reversion confirmation (99%+ revert) → historical pattern → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Scenario: Latency Arbitrage — faster execution vs market data lag detection (sub-100µs round-trip vs 900µs market average) → stale quote exploitation mapping (cross-exchange) → victim impact assessment → infrastructure investigation (co-lo, microwave) → regulatory framework analysis → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Scenario: Order Book Imbalance Exploitation — sudden imbalance creation detection (phantom bid/ask wall) → reversal detection (mass cancel + opposite-side execution) → intent analysis (0% fill rate) → victim impact → historical pattern → compliance review → SEC/FINRA referral", "status": "pass"},
+            {"check": "Scenario: Trader Behavior Deviation — new instrument detection (crypto-adjacent sector, 0% historical overlap) → sudden volume increase (3.11x, Z-score 4.8) → trading time shift (pre/after-market, 62% outside normal) → AI behavioral clustering (94.2% dissimilar, anomaly 96/100) → event correlation → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Multi-case-type support: AML, Fraud, and Surveillance cases managed in unified platform with type-specific workflows", "status": "pass"},
             {"check": "Case listing with filtering: list all cases with case_id, type, status, priority, assignee, timestamps", "status": "pass"},
             {"check": "Case detail retrieval: full case record including all metadata, timeline, evidence count, comment count, SLA status", "status": "pass"},
@@ -5917,6 +5918,129 @@ async def actone_scenario_order_book_imbalance_proxy(current_user=Depends(get_cu
     }
 
 
+@router.post("/admin/data-sources/actone/scenarios/trader-behavior-deviation")
+async def actone_scenario_trader_behavior_deviation_proxy(current_user=Depends(get_current_user)):
+    """Run Behavioral & AI-Based Anomaly Detection — Trader Behavior Deviation scenario end-to-end."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "Behavioral & AI-Based Anomaly Detection — Trader Behavior Deviation",
+        "case_id": "ACT-SCEN-TBD-001",
+        "case_type": "surveillance",
+        "final_status": "closed_referred",
+        "priority": "critical",
+        "trader_profile": {
+            "trader_id": "TRD-4478",
+            "name": "Marcus J. Hillman",
+            "desk": "Equities — Electronic Trading",
+            "firm": "Granite Peak Capital",
+            "tenure_years": 8.3,
+            "historical_profile_period": "2024-01-01 to 2026-02-28",
+            "instruments_historically_traded": ["SPY", "QQQ", "IWM", "AAPL", "MSFT"],
+            "avg_daily_volume_usd": 12_400_000,
+            "avg_trades_per_day": 145,
+            "typical_trading_window": "09:35 — 15:45 ET",
+        },
+        "investigation_steps": [
+            {"step": 1, "action": "New instrument detection",
+             "timestamp": (now - timedelta(hours=6)).isoformat() + "Z",
+             "result": "Trader began trading 7 new instruments never traded before: BITO (Bitcoin ETF), MSTR, COIN, RIOT, MARA, HUT, CLSK — all crypto-adjacent equities. Zero history in this sector over 8.3 years. First trade 2026-03-10, volume escalated to $4.2M/day by 2026-03-14. Deviation score: 9.4/10.",
+             "new_instruments": {
+                 "instruments": ["BITO", "MSTR", "COIN", "RIOT", "MARA", "HUT", "CLSK"],
+                 "sector": "crypto-adjacent equities",
+                 "first_trade_date": "2026-03-10",
+                 "historical_overlap_pct": 0.0,
+                 "deviation_score": 9.4
+             }},
+            {"step": 2, "action": "Sudden volume increase analysis",
+             "timestamp": (now - timedelta(hours=5, minutes=30)).isoformat() + "Z",
+             "result": "Daily traded volume surged from $12.4M avg → $38.6M on 2026-03-14, a 3.11x increase. Position sizes grew from avg $85K → $420K per trade (4.9x). Intraday P&L volatility shifted from ±$45K → ±$310K. Volume Z-score: 4.8 (>3.0 = critical anomaly).",
+             "volume_analysis": {
+                 "historical_avg_daily_usd": 12_400_000,
+                 "peak_daily_usd": 38_600_000,
+                 "volume_multiplier": 3.11,
+                 "avg_position_size_before": 85_000,
+                 "avg_position_size_after": 420_000,
+                 "position_size_multiplier": 4.9,
+                 "pnl_volatility_before": 45_000,
+                 "pnl_volatility_after": 310_000,
+                 "volume_z_score": 4.8,
+                 "threshold_critical": 3.0
+             }},
+            {"step": 3, "action": "Trading time deviation detection",
+             "timestamp": (now - timedelta(hours=5)).isoformat() + "Z",
+             "result": "Normal window: 09:35-15:45 ET. New pattern: active 04:00-09:30 ET (pre-market) and 16:00-20:00 ET (after-hours). 62% of new-instrument trades executed outside normal hours. Pre-market trades correlate with Asian crypto market moves (BTC/ETH). Time-deviation score: 8.7/10.",
+             "time_analysis": {
+                 "historical_start": "09:35 ET",
+                 "historical_end": "15:45 ET",
+                 "new_start": "04:00 ET",
+                 "new_end": "20:00 ET",
+                 "pct_outside_normal_hours": 62,
+                 "pre_market_correlation": "Asian crypto market (BTC/ETH)",
+                 "after_hours_sessions": 9,
+                 "time_deviation_score": 8.7
+             }},
+            {"step": 4, "action": "Behavioral pattern clustering (AI model)",
+             "timestamp": (now - timedelta(hours=4, minutes=30)).isoformat() + "Z",
+             "result": "ML clustering model flagged trader's recent behavior as 94.2% dissimilar from 2-year baseline. Key deviations: (1) order-to-trade ratio jumped 1.8→6.4, (2) cancel rate 12%→47%, (3) holding period collapsed from avg 4.2 hrs → 18 min, (4) aggressive order pct 22%→71%. Composite anomaly score: 96/100.",
+             "ai_analysis": {
+                 "model": "Trader Behavior LSTM v3.2",
+                 "baseline_period_months": 24,
+                 "dissimilarity_pct": 94.2,
+                 "order_to_trade_ratio_before": 1.8,
+                 "order_to_trade_ratio_after": 6.4,
+                 "cancel_rate_before_pct": 12,
+                 "cancel_rate_after_pct": 47,
+                 "avg_holding_period_before_hrs": 4.2,
+                 "avg_holding_period_after_min": 18,
+                 "aggressive_order_pct_before": 22,
+                 "aggressive_order_pct_after": 71,
+                 "composite_anomaly_score": 96
+             }},
+            {"step": 5, "action": "Cross-reference with external events",
+             "timestamp": (now - timedelta(hours=4)).isoformat() + "Z",
+             "result": "Checked news/event calendar: SEC crypto ETF ruling expected 2026-03-20. Trader's new positions align with crypto-adjacent tickers that would benefit from approval. Also found trader attended FinTech conference 2026-03-08 where regulatory panelists spoke. Potential information advantage.",
+             "event_correlation": {
+                 "upcoming_event": "SEC crypto ETF ruling — 2026-03-20",
+                 "position_alignment": "crypto-adjacent equities (BITO, MSTR, COIN)",
+                 "conference_attended": "FinTech Innovation Summit — 2026-03-08",
+                 "speakers_of_interest": ["SEC Commissioner Panel", "Digital Asset Regulation Outlook"],
+                 "information_advantage_flag": True
+             }},
+            {"step": 6, "action": "Compliance review & risk assessment",
+             "timestamp": (now - timedelta(hours=3)).isoformat() + "Z",
+             "result": "Chief Compliance Officer confirmed: (1) No pre-approval for new instrument sector, (2) violated desk mandate (equities only, not crypto-adjacent), (3) exceeded overnight risk limits on 3 occasions, (4) failed to file change-of-strategy notice per firm policy. Regulatory risk: potential insider trading (SEC Rule 10b-5), market manipulation via concentrated positions.",
+             "compliance_findings": {
+                 "pre_approval_obtained": False,
+                 "desk_mandate_violation": True,
+                 "overnight_limit_breaches": 3,
+                 "strategy_change_filed": False,
+                 "regulatory_rules": ["SEC Rule 10b-5", "FINRA Rule 3110", "Firm Policy 4.2.1"]
+             }},
+            {"step": 7, "action": "Regulatory referral preparation",
+             "timestamp": (now - timedelta(hours=2)).isoformat() + "Z",
+             "result": "Package prepared for SEC and FINRA: behavioral deviation report, AI anomaly score (96/100), new instrument analysis, volume surge evidence, time-window shift, event correlation, and compliance violations. Trader placed on enhanced monitoring. Trading privileges in new instruments suspended pending review.",
+             "referral": {
+                 "agencies": ["SEC", "FINRA"],
+                 "package_contents": ["behavioral deviation report", "AI anomaly model output", "trade-level data (487 trades)", "volume analysis", "time-window analysis", "event correlation", "compliance violation summary"],
+                 "trader_action": "enhanced monitoring + new-instrument suspension",
+                 "estimated_exposure": 8_200_000
+             }}
+        ],
+        "deviation_summary": {
+            "overall_anomaly_score": 96,
+            "new_instruments_count": 7,
+            "volume_multiplier": 3.11,
+            "time_deviation_score": 8.7,
+            "ai_dissimilarity_pct": 94.2,
+            "days_of_deviation": 5,
+            "total_trades_in_new_pattern": 487,
+            "estimated_unrealized_pnl": 1_340_000
+        },
+        "total_steps": 7,
+        "total_duration_hours": 4,
+    }
+
+
 @router.get("/admin/data-sources/actone/customer360/{customer_id}")
 async def actone_customer360_proxy(customer_id: str, current_user=Depends(get_current_user)):
     """Get Customer 360 view for investigation."""
@@ -7056,6 +7180,15 @@ ALERTS = [
     {"alert_id": "ALT-20402", "alert_type": "order_book_imbalance", "severity": "high", "status": "new", "risk_score": 82, "priority": "high",
      "customer_id": "HFT-OBI-311", "customer_name": "Spectral Trading Corp (ALGO-OBI-311)", "description": "Potential order book manipulation on AMD: Bid wall appeared (~600K shares) then cancelled after 4.2 sec. Coincided with 60K share buy at discount. Reviewing if wall was genuine or phantom",
      "assigned_to": None, "rule_id": "SUR-015", "created_at": "2026-03-18T07:30:00Z", "updated_at": "2026-03-18T07:30:00Z"},
+    {"alert_id": "ALT-20410", "alert_type": "trader_behavior_deviation", "severity": "critical", "status": "escalated", "risk_score": 96, "priority": "critical",
+     "customer_id": "TRD-4478", "customer_name": "Marcus J. Hillman (Granite Peak Capital)", "description": "Trader behavior deviation: 7 new crypto-adjacent instruments (0% historical overlap), volume 3.11x surge ($12.4M→$38.6M), 62% trades outside normal hours, AI anomaly score 96/100, cancel rate 12%→47%, holding period 4.2hrs→18min. Upcoming SEC crypto ETF ruling 2026-03-20",
+     "assigned_to": "USR-005", "rule_id": "SUR-016", "created_at": "2026-03-14T14:00:00Z", "updated_at": "2026-03-18T10:00:00Z"},
+    {"alert_id": "ALT-20411", "alert_type": "trader_behavior_deviation", "severity": "high", "status": "assigned", "risk_score": 89, "priority": "high",
+     "customer_id": "TRD-5592", "customer_name": "Lisa K. Hartwell (Apex Trading Group)", "description": "Behavioral shift: portfolio manager suddenly trading high-yield emerging market bonds (zero prior history). Volume 2.4x baseline, 78% after-hours, coincides with central bank rate announcement. Anomaly score 89/100",
+     "assigned_to": "USR-003", "rule_id": "SUR-016", "created_at": "2026-03-15T11:00:00Z", "updated_at": "2026-03-17T16:00:00Z"},
+    {"alert_id": "ALT-20412", "alert_type": "trader_behavior_deviation", "severity": "medium", "status": "new", "risk_score": 74, "priority": "medium",
+     "customer_id": "TRD-6783", "customer_name": "David R. Chen (Summit Securities)", "description": "Moderate deviation: equity trader began options activity (calls on 4 pharma stocks). Volume 1.6x normal, slightly extended hours. FDA approval calendar correlation detected. Anomaly score 74/100. Needs review",
+     "assigned_to": None, "rule_id": "SUR-016", "created_at": "2026-03-17T09:00:00Z", "updated_at": "2026-03-17T09:00:00Z"},
 ]
 
 
