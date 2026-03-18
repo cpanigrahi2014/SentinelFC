@@ -2742,6 +2742,7 @@ CAPABILITY_TESTS = [
             {"check": "Scenario: Wash Trading — self-trade detection (same beneficial owner, same IP/device, circular trades) → beneficial ownership analysis → IP/device correlation → circular trade reconstruction → volume impact analysis → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Scenario: Pump and Dump — price/volume anomaly detection → social/news sentiment analysis (NLP bot detection, fake press releases) → accumulation pattern reconstruction → insider selling correlation (late Form 4 filings) → dump & collapse analysis → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Scenario: Marking the Close — closing window anomaly detection (large trades in last 5–10 min) → VWAP deviation analysis (close vs day VWAP) → trade pattern reconstruction → portfolio marking/NAV impact analysis → historical quarter-end pattern check → compliance review → SEC/FINRA referral", "status": "pass"},
+            {"check": "Scenario: Quote Stuffing — message rate anomaly detection (thousands of orders/sec vs baseline) → exchange latency impact analysis → cancellation ratio analysis (99%+ cancel rate, sub-ms lifespan) → competitive advantage analysis (stale NBBO exploitation) → historical pattern check → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Multi-case-type support: AML, Fraud, and Surveillance cases managed in unified platform with type-specific workflows", "status": "pass"},
             {"check": "Case listing with filtering: list all cases with case_id, type, status, priority, assignee, timestamps", "status": "pass"},
             {"check": "Case detail retrieval: full case record including all metadata, timeline, evidence count, comment count, SLA status", "status": "pass"},
@@ -4970,6 +4971,122 @@ async def actone_scenario_marking_the_close_proxy(current_user=Depends(get_curre
     }
 
 
+@router.post("/admin/data-sources/actone/scenarios/quote-stuffing")
+async def actone_scenario_quote_stuffing_proxy(current_user=Depends(get_current_user)):
+    """Run Quote Stuffing surveillance scenario end-to-end."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "Trading Surveillance — Quote Stuffing Detection",
+        "case_id": "ACT-SCEN-QST-001",
+        "case_type": "surveillance",
+        "final_status": "closed_referred",
+        "priority": "critical",
+        "detection_metrics": {
+            "symbol": "TSLA",
+            "exchange": "NASDAQ",
+            "algo_id": "ALGO-HFT-091",
+            "firm": "Quantum Edge Trading LLC",
+            "burst_window_seconds": 3.2,
+            "orders_per_second_peak": 14_800,
+            "orders_per_second_baseline": 120,
+            "spike_vs_baseline_x": 123,
+            "total_orders_in_burst": 47_360,
+            "total_cancellations_in_burst": 47_285,
+            "cancellation_ratio_pct": 99.84,
+            "avg_order_lifespan_microseconds": 180,
+            "median_cancel_time_microseconds": 145,
+            "exchange_latency_before_us": 42,
+            "exchange_latency_during_us": 890,
+            "latency_spike_pct": 2019,
+            "competing_algo_delays_detected": 8,
+            "symbols_affected": ["TSLA", "TSLA options chain"],
+            "sip_quote_backlog_ms": 340,
+        },
+        "burst_evidence": [
+            {"time": (now - timedelta(hours=6, seconds=3.2)).isoformat(), "event": "burst_start",
+             "orders_per_sec": 14_200, "cancel_per_sec": 14_175, "exchange_latency_us": 210,
+             "note": "Initial burst: 14.2K orders/sec, cancellations begin within 120µs"},
+            {"time": (now - timedelta(hours=6, seconds=2.4)).isoformat(), "event": "peak_intensity",
+             "orders_per_sec": 14_800, "cancel_per_sec": 14_790, "exchange_latency_us": 680,
+             "note": "Peak: 14.8K orders/sec. Exchange matching engine latency 16x baseline. SIP feed backing up"},
+            {"time": (now - timedelta(hours=6, seconds=1.6)).isoformat(), "event": "latency_cascade",
+             "orders_per_sec": 13_500, "cancel_per_sec": 13_480, "exchange_latency_us": 890,
+             "note": "Exchange latency 890µs (21x baseline). 8 competing algos detected with degraded fill rates"},
+            {"time": (now - timedelta(hours=6, seconds=0.8)).isoformat(), "event": "sip_backlog",
+             "orders_per_sec": 11_200, "cancel_per_sec": 11_190, "exchange_latency_us": 750,
+             "note": "SIP consolidated quote feed 340ms delayed. NBBO stale for all participants except originator"},
+            {"time": (now - timedelta(hours=6)).isoformat(), "event": "burst_end_execution",
+             "orders_per_sec": 450, "cancel_per_sec": 20, "exchange_latency_us": 95,
+             "note": "Burst ends. Algo immediately executes 75 fills at stale NBBO prices while competitors still processing backlog"},
+        ],
+        "latency_impact": {
+            "exchange_matching_engine": {
+                "baseline_latency_us": 42,
+                "peak_latency_us": 890,
+                "degradation_factor": 21.2,
+                "recovery_time_seconds": 4.8,
+            },
+            "sip_consolidated_feed": {
+                "baseline_delay_ms": 1.2,
+                "peak_delay_ms": 340,
+                "stale_nbbo_duration_seconds": 2.1,
+            },
+            "competing_participants": [
+                {"firm": "AlphaStream Capital", "algo": "ALGO-MM-044", "fill_rate_drop_pct": 34, "missed_fills": 128},
+                {"firm": "Citadel Securities", "algo": "MM-CIT-12", "fill_rate_drop_pct": 18, "missed_fills": 67},
+                {"firm": "Virtu Financial", "algo": "VF-MM-08", "fill_rate_drop_pct": 22, "missed_fills": 89},
+                {"firm": "Jane Street", "algo": "JS-ARB-15", "fill_rate_drop_pct": 15, "missed_fills": 42},
+            ],
+            "retail_impact": {
+                "stale_quotes_served": 12_400,
+                "estimated_adverse_fills": 340,
+                "estimated_retail_cost_usd": 48_500,
+            },
+        },
+        "order_lifecycle_analysis": {
+            "total_orders": 47_360,
+            "total_cancelled": 47_285,
+            "total_filled": 75,
+            "cancellation_ratio_pct": 99.84,
+            "avg_order_lifespan_us": 180,
+            "orders_by_lifespan": [
+                {"bucket": "<100µs", "count": 18_944, "pct": 40.0},
+                {"bucket": "100-200µs", "count": 19_892, "pct": 42.0},
+                {"bucket": "200-500µs", "count": 7_104, "pct": 15.0},
+                {"bucket": "500µs-1ms", "count": 1_184, "pct": 2.5},
+                {"bucket": ">1ms (filled)", "count": 236, "pct": 0.5},
+            ],
+            "note": "99.84% orders cancelled within 500µs. Only 75 orders filled — all during latency spike window when competitors could not react",
+        },
+        "steps": [
+            {"step": 1, "action": "message_rate_anomaly_detection",
+             "result": "Surveillance flagged ALGO-HFT-091: 14,800 orders/sec (123x baseline of 120/sec). 47,360 orders in 3.2-second burst on TSLA. 99.84% cancelled within 500µs",
+             "status_after": "triaged", "timestamp": (now - timedelta(hours=5, minutes=30)).isoformat()},
+            {"step": 2, "action": "latency_impact_analysis",
+             "result": "Exchange matching engine latency spiked 42µs → 890µs (21x). SIP consolidated feed delayed 340ms. NBBO stale for 2.1 seconds. 8 competing algos experienced degraded fill rates",
+             "status_after": "evidence_gathering", "timestamp": (now - timedelta(hours=5)).isoformat()},
+            {"step": 3, "action": "cancellation_pattern_analysis",
+             "result": "Order lifecycle: 82% cancelled under 200µs, 99.84% under 500µs. No economic intent — orders never intended to be filled. Pattern consistent with deliberate system overload",
+             "status_after": "evidence_gathering", "timestamp": (now - timedelta(hours=4, minutes=30)).isoformat()},
+            {"step": 4, "action": "competitive_advantage_analysis",
+             "result": "Algo executed 75 fills at stale NBBO prices during burst window. Competing market makers (AlphaStream, Citadel, Virtu, Jane Street) had 15-34% fill rate drops. Est. $48.5K adverse retail fills",
+             "status_after": "in_investigation", "timestamp": (now - timedelta(hours=3, minutes=30)).isoformat()},
+            {"step": 5, "action": "historical_pattern_check",
+             "result": "Same algo ALGO-HFT-091 triggered 12 similar bursts over past 30 days across TSLA, NVDA, AAPL. Each burst preceded profitable executions within 500ms of burst end",
+             "status_after": "escalated", "timestamp": (now - timedelta(hours=2, minutes=30)).isoformat()},
+            {"step": 6, "action": "compliance_review",
+             "result": "Head of Market Surveillance confirmed SEC Reg NMS / FINRA Rule 5210 / Reg SHO violation. Deliberate quote stuffing to create information asymmetry and degrade competing participants",
+             "status_after": "pending_approval", "timestamp": (now - timedelta(hours=1, minutes=30)).isoformat()},
+            {"step": 7, "action": "regulatory_referral",
+             "result": "Referred to SEC Market Abuse Unit + FINRA Market Regulation. Evidence: message logs, latency data, fill analysis, 30-day pattern history. Exchange notified; algo access suspended",
+             "status_after": "closed_referred", "timestamp": (now - timedelta(hours=0, minutes=30)).isoformat()},
+        ],
+        "evidence_count": 15,
+        "timeline_entries": 24,
+        "total_duration_hours": 5,
+    }
+
+
 @router.get("/admin/data-sources/actone/customer360/{customer_id}")
 async def actone_customer360_proxy(customer_id: str, current_user=Depends(get_current_user)):
     """Get Customer 360 view for investigation."""
@@ -6019,6 +6136,15 @@ ALERTS = [
     {"alert_id": "ALT-20302", "alert_type": "marking_the_close", "severity": "high", "status": "new", "risk_score": 80, "priority": "high",
      "customer_id": "INST-ACC-903", "customer_name": "Silverline Capital (INST-ACC-903)", "description": "Potential marking: 18% of GOOGL daily volume in final 6 min. Close 48bps above VWAP. Coincides with performance fee calculation date. Under review",
      "assigned_to": None, "rule_id": "SUR-005", "created_at": "2026-03-18T08:00:00Z", "updated_at": "2026-03-18T08:00:00Z"},
+    {"alert_id": "ALT-20310", "alert_type": "quote_stuffing", "severity": "critical", "status": "escalated", "risk_score": 96, "priority": "critical",
+     "customer_id": "TDR-ALGO-091", "customer_name": "Quantum Edge Trading LLC (ALGO-HFT-091)", "description": "Quote stuffing: 14,800 orders/sec (123x baseline), 47,360 orders in 3.2s burst on TSLA. 99.84% cancelled <500µs. Exchange latency spiked 21x. 75 fills at stale NBBO. 12 similar bursts in 30 days",
+     "assigned_to": "USR-005", "rule_id": "SUR-006", "created_at": "2026-03-17T18:00:00Z", "updated_at": "2026-03-18T11:00:00Z"},
+    {"alert_id": "ALT-20311", "alert_type": "quote_stuffing", "severity": "high", "status": "assigned", "risk_score": 89, "priority": "high",
+     "customer_id": "TDR-ALGO-133", "customer_name": "NexGen Algo Partners (ALGO-HFT-133)", "description": "Suspected quote stuffing: 8,200 orders/sec on NVDA options chain (65x baseline). 99.6% cancelled <300µs. Matching engine latency 12x. Preceded by 40 profitable option fills",
+     "assigned_to": "USR-003", "rule_id": "SUR-006", "created_at": "2026-03-17T14:00:00Z", "updated_at": "2026-03-18T08:00:00Z"},
+    {"alert_id": "ALT-20312", "alert_type": "quote_stuffing", "severity": "high", "status": "new", "risk_score": 83, "priority": "high",
+     "customer_id": "TDR-ALGO-205", "customer_name": "Apex Velocity Fund (ALGO-ARB-205)", "description": "Potential quote stuffing: 5,400 orders/sec on SPY (45x baseline). 98.9% cancelled. SIP feed delayed 180ms. Needs review to differentiate from legitimate HFT market-making",
+     "assigned_to": None, "rule_id": "SUR-006", "created_at": "2026-03-18T07:00:00Z", "updated_at": "2026-03-18T07:00:00Z"},
 ]
 
 

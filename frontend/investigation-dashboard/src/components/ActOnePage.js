@@ -27,7 +27,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -490,6 +490,8 @@ function ScenariosTab() {
       desc: 'Price/volume anomaly → social sentiment analysis (bots, fake press releases) → accumulation pattern → insider selling correlation (late Form 4) → dump & collapse → compliance → SEC/FINRA referral' },
     { key: 'markingTheClose', label: 'Marking the Close', icon: <TrendingUpIcon />, fn: actoneScenarioMarkingTheClose,
       desc: 'Closing window anomaly (large trades in last 5–10 min) → VWAP deviation analysis → trade pattern reconstruction → portfolio NAV impact → historical quarter-end pattern → compliance → SEC/FINRA referral' },
+    { key: 'quoteStuffing', label: 'Quote Stuffing Detection', icon: <TrendingUpIcon />, fn: actoneScenarioQuoteStuffing,
+      desc: 'Message rate anomaly (thousands of orders/sec) → exchange latency impact → cancellation ratio analysis (99%+ cancel, sub-ms lifespan) → stale NBBO exploitation → historical pattern → compliance → SEC/FINRA referral' },
   ];
 
   return (
