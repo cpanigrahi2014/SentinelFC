@@ -30,7 +30,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation, actoneScenarioRogueTrader, actoneScenarioUnusualProfitability, actoneScenarioEquityOptionsManipulation, actoneScenarioFxManipulation, actoneScenarioCommodityManipulation, actoneScenarioRegulatoryCompliance, actoneScenarioMissingData, actoneScenarioDuplicateTrades, actoneScenarioTimeSyncIssues, actoneScenarioRuleEngineTesting,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation, actoneScenarioRogueTrader, actoneScenarioUnusualProfitability, actoneScenarioEquityOptionsManipulation, actoneScenarioFxManipulation, actoneScenarioCommodityManipulation, actoneScenarioRegulatoryCompliance, actoneScenarioMissingData, actoneScenarioDuplicateTrades, actoneScenarioTimeSyncIssues, actoneScenarioRuleEngineTesting, actoneScenarioE2eWorkflow,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -535,6 +535,8 @@ function ScenariosTab() {
       desc: '6/48 systems drifted (worst 340ms) → 31,847 timestamp violations (0.76%) → 50 surveillance alerts affected (14 FP, 6 FN) → GPS PPS correction → NTP remediation all 6 systems → MiFID II RTS-25 compliant, continuous monitoring' },
     { key: 'ruleEngineTesting', label: 'Rule Engine Testing', icon: <TuneIcon />, fn: actoneScenarioRuleEngineTesting,
       desc: '70 rules (38 threshold + 24 pattern + 8 ML). Threshold: 100% boundary accuracy. Pattern: F1 0.971. ML: AUC 0.947. E2E: precision 95.7%→98.1%, recall 97.8%→98.2%, F1 0.968→0.982. FP -57.2%, FN -20.2%. 4 tuning actions, regression verified' },
+    { key: 'e2eWorkflow', label: 'End-to-End Workflow (Trade → SAR)', icon: <AccountTreeIcon />, fn: actoneScenarioE2eWorkflow,
+      desc: 'Trade executed (185K AAPL, $44.93M) → data ingested (1.2s) → 3 rules fired (2.8s) → alert generated (risk 94, critical) → case created (insider trading) → investigator review (2.5 hrs, 28 evidence items) → SAR filed FinCEN + STR filed FCA ($46.13M). All SLAs met' },
   ];
 
   return (

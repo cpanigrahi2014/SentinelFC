@@ -2763,6 +2763,7 @@ CAPABILITY_TESTS = [
             {"check": "Scenario: Duplicate Trade Detection — 5,056 duplicates in 4.2M trades (0.12% rate) → root causes (FIX retransmission 51.7%, Kafka rebalance 28.5%, venue corrections 19.8%) → 18 false-positive alerts suppressed → $142.8M notional corrected → idempotency + exactly-once + FIX dedup deployed (99.5% projected reduction)", "status": "pass"},
             {"check": "Scenario: Time Sync Issues — 6/48 systems drifted (worst 340ms settlement, 47ms CME gateway) → 31,847 timestamp violations (0.76%) → 50 surveillance alerts affected (14 FP, 6 FN) → GPS PPS correction → NTP remediation → RTS-25 compliant, continuous monitoring deployed", "status": "pass"},
             {"check": "Scenario: Rule Engine Testing — 70 rules validated (38 threshold + 24 pattern + 8 ML). Threshold: 100% boundary accuracy. Pattern: 96.7% precision / 97.5% recall (F1 0.971). ML: avg AUC 0.947, all PSI <0.1. End-to-end firing accuracy: precision 95.7% → 98.1%, recall 97.8% → 98.2%, F1 0.968 → 0.982. FP reduced 57.2%, FN reduced 20.2%. 4 tuning actions applied, regression verified", "status": "pass"},
+            {"check": "Scenario: E2E Workflow — Trade executed (185K AAPL, $44.93M) → data ingested (1.2s, 5 enrichments, 5 DQ checks passed) → 3 rules fired (threshold 8.4x volume + pattern pre-earnings + ML LSTM 0.91, 2.8s) → alert ALT-E2E-50001 (critical, risk 94, auto-routed Tier-2) → case CASE-E2E-70001 (insider trading, options + comms evidence) → investigator reviewed (2.5 hrs, 28 evidence items, 5 critical findings) → SAR filed FinCEN + STR filed FCA ($46.13M suspicious). All SLAs met, 47 audit trail events", "status": "pass"},
             {"check": "Multi-case-type support: AML, Fraud, and Surveillance cases managed in unified platform with type-specific workflows", "status": "pass"},
             {"check": "Case listing with filtering: list all cases with case_id, type, status, priority, assignee, timestamps", "status": "pass"},
             {"check": "Case detail retrieval: full case record including all metadata, timeline, evidence count, comment count, SLA status", "status": "pass"},
@@ -7401,6 +7402,236 @@ async def actone_scenario_rule_engine_testing_proxy(current_user=Depends(get_cur
     }
 
 
+@router.post("/admin/data-sources/actone/scenarios/e2e-workflow")
+async def actone_scenario_e2e_workflow_proxy(current_user=Depends(get_current_user)):
+    """Run End-to-End Workflow Testing — trade to SAR/STR filing full lifecycle."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "End-to-End Workflow Testing — Trade to SAR/STR Filing",
+        "case_id": "ACT-SCEN-E2E-001",
+        "case_type": "e2e_workflow_validation",
+        "final_status": "closed_sar_filed",
+        "priority": "critical",
+        "test_trade": {
+            "trade_id": "TRD-E2E-20260318-001",
+            "instrument": "AAPL",
+            "side": "BUY",
+            "quantity": 185_000,
+            "price": 242.87,
+            "notional_usd": 44_930_950,
+            "venue": "NYSE",
+            "trader_id": "TRD-DESK-EQ-07",
+            "account_id": "ACC-INST-4412",
+            "customer_id": "CUST-HF-0089",
+            "customer_name": "Meridian Capital Partners LP",
+            "execution_timestamp": (now - timedelta(hours=10, minutes=42)).isoformat() + "Z",
+            "settlement_date": "2026-03-20",
+            "order_type": "limit",
+            "tif": "DAY"
+        },
+        "investigation_steps": [
+            {"step": 1, "action": "Step 1 — Trade Executed",
+             "timestamp": (now - timedelta(hours=10, minutes=42)).isoformat() + "Z",
+             "result": "Trade TRD-E2E-20260318-001 executed on NYSE: BUY 185,000 AAPL @ $242.87 ($44.93M notional) for Meridian Capital Partners LP (account ACC-INST-4412). Order entered at 09:18:00 ET, filled at 09:18:42 ET across 3 child orders (85K + 62K + 38K shares). Pre-trade risk checks passed: position limit OK, credit check OK, restricted list clear. Execution quality: VWAP -0.03% (favorable).",
+             "trade_execution": {
+                 "trade_id": "TRD-E2E-20260318-001",
+                 "status": "filled",
+                 "order_entry_time": "09:18:00 ET",
+                 "fill_time": "09:18:42 ET",
+                 "fill_latency_sec": 42,
+                 "child_orders": [
+                     {"child_id": "CHD-001", "qty": 85_000, "price": 242.85, "venue": "NYSE", "fill_time": "09:18:12 ET"},
+                     {"child_id": "CHD-002", "qty": 62_000, "price": 242.88, "venue": "NYSE", "fill_time": "09:18:28 ET"},
+                     {"child_id": "CHD-003", "qty": 38_000, "price": 242.90, "venue": "ARCA", "fill_time": "09:18:42 ET"}
+                 ],
+                 "pre_trade_checks": {
+                     "position_limit": "pass",
+                     "credit_check": "pass",
+                     "restricted_list": "clear",
+                     "fat_finger_check": "pass"
+                 },
+                 "vwap_performance_pct": -0.03,
+                 "market_impact_bps": 1.8
+             }},
+            {"step": 2, "action": "Step 2 — Data Ingested",
+             "timestamp": (now - timedelta(hours=10, minutes=41)).isoformat() + "Z",
+             "result": "Trade data ingested into surveillance platform within 1.2 seconds of execution. Data enrichment pipeline: (1) Trade record captured from FIX drop copy (0.3s). (2) Market data snapshot enriched — AAPL pre-trade price $242.84, NBBO $242.83/$242.89, daily volume baseline 42M shares. (3) Customer profile loaded — Meridian Capital: hedge fund, AUM $2.8B, risk score 0.68, sector: technology long/short. (4) Historical patterns loaded — avg daily AAPL volume for this account: 22K shares (185K = 8.4x normal). (5) Cross-reference: AAPL earnings announcement scheduled T+2 (March 20). Data quality checks: all 5 passed (completeness, accuracy, timeliness, consistency, uniqueness).",
+             "data_ingestion": {
+                 "ingestion_latency_sec": 1.2,
+                 "data_source": "FIX_drop_copy",
+                 "enrichment_steps": 5,
+                 "enrichments": [
+                     {"type": "trade_capture", "latency_sec": 0.3, "status": "complete"},
+                     {"type": "market_data_snapshot", "latency_sec": 0.2, "aapl_pre_price": 242.84, "nbbo": "242.83/242.89", "daily_vol_baseline": 42_000_000},
+                     {"type": "customer_profile", "latency_sec": 0.3, "customer_type": "hedge_fund", "aum_usd": 2_800_000_000, "risk_score": 0.68, "sector": "tech_long_short"},
+                     {"type": "historical_patterns", "latency_sec": 0.2, "avg_daily_aapl_volume": 22_000, "current_volume": 185_000, "volume_multiple": 8.4},
+                     {"type": "corporate_events", "latency_sec": 0.2, "event": "earnings_announcement", "event_date": "2026-03-20", "days_before_event": 2}
+                 ],
+                 "data_quality_checks": {
+                     "completeness": "pass",
+                     "accuracy": "pass",
+                     "timeliness": "pass",
+                     "consistency": "pass",
+                     "uniqueness": "pass"
+                 }
+             }},
+            {"step": 3, "action": "Step 3 — Rule Triggered",
+             "timestamp": (now - timedelta(hours=10, minutes=40)).isoformat() + "Z",
+             "result": "Three rules triggered within 2.8 seconds of ingestion: (1) Threshold rule SUR-VOLUME-001: trade volume 185K shares = 8.4x account baseline of 22K (threshold: 5x). Fired in 0.8s. (2) Pattern rule SUR-INSIDER-003: large position buildup 2 days before scheduled earnings announcement matches pre-announcement trading pattern. Fired in 1.4s. (3) ML model INSIDER-LSTM: anomaly score 0.91 (threshold 0.74) — trade size, timing relative to corporate event, and account behavioral deviation all flagged. Inference in 0.6s. Combined risk score: 94 (critical).",
+             "rules_triggered": {
+                 "total_rules_fired": 3,
+                 "combined_risk_score": 94,
+                 "severity": "critical",
+                 "rules": [
+                     {"rule_id": "SUR-VOLUME-001", "type": "threshold", "name": "Unusual Volume", "condition": "trade_volume > 5x_baseline", "actual_value": "8.4x", "threshold_value": "5x", "fire_latency_sec": 0.8},
+                     {"rule_id": "SUR-INSIDER-003", "type": "pattern", "name": "Pre-Announcement Trading", "condition": "large_position_change within 3 days of scheduled corporate event", "matched_event": "AAPL earnings 2026-03-20", "fire_latency_sec": 1.4},
+                     {"rule_id": "ML-INSIDER-LSTM", "type": "ml_model", "name": "Insider Trading LSTM", "anomaly_score": 0.91, "threshold": 0.74, "inference_latency_sec": 0.6, "features_contributing": ["volume_deviation", "timing_to_event", "behavioral_shift", "position_concentration"]}
+                 ],
+                 "total_latency_sec": 2.8,
+                 "within_sla": True,
+                 "sla_sec": 5
+             }},
+            {"step": 4, "action": "Step 4 — Alert Generated",
+             "timestamp": (now - timedelta(hours=10, minutes=39)).isoformat() + "Z",
+             "result": "Alert ALT-E2E-50001 generated automatically. Severity: CRITICAL. Priority: P1. Type: potential_insider_trading. Risk score: 94. Alert enriched with: (1) Trade details and child order breakdown. (2) Customer 360 profile snapshot. (3) Corporate event calendar link. (4) Historical trading pattern for AAPL by this account (90-day chart). (5) Network graph showing Meridian Capital's known connections to AAPL insiders (2 connections identified via LinkedIn/board membership data). (6) Similar historical alerts for this customer (1 prior, resolved as no-action). Alert routed to Tier-2 Senior Analyst queue (bypassed Tier-1 due to critical severity).",
+             "alert_generated": {
+                 "alert_id": "ALT-E2E-50001",
+                 "alert_type": "potential_insider_trading",
+                 "severity": "critical",
+                 "priority": "P1",
+                 "risk_score": 94,
+                 "generation_latency_sec": 0.4,
+                 "enrichments_attached": 6,
+                 "enrichments": [
+                     "trade_details_with_child_orders",
+                     "customer_360_profile",
+                     "corporate_event_calendar",
+                     "90_day_trading_history_chart",
+                     "network_graph_insider_connections",
+                     "historical_alerts_for_customer"
+                 ],
+                 "insider_connections_found": 2,
+                 "prior_alerts_for_customer": 1,
+                 "prior_alert_disposition": "no_action",
+                 "routing": {
+                     "queue": "Tier-2 Senior Analyst",
+                     "bypass_tier1": True,
+                     "reason": "Critical severity auto-escalation",
+                     "assigned_to": "Sarah Chen (USR-005)"
+                 }
+             }},
+            {"step": 5, "action": "Step 5 — Case Created",
+             "timestamp": (now - timedelta(hours=10, minutes=38)).isoformat() + "Z",
+             "result": "Case CASE-E2E-70001 auto-created from alert ALT-E2E-50001. Case type: insider_trading_investigation. Priority: Critical. SLA: 4 hours for initial review, 48 hours for full investigation. Case enriched with all alert evidence plus: (1) Automated EDGAR filing check — no Form 4 filed by Meridian for AAPL in last 30 days. (2) Options activity scan — account also holds 2,400 AAPL Mar-20 $245 calls purchased T-5 ($1.2M premium). (3) Communications surveillance flag — 3 flagged Bloomberg chat messages between Meridian PM and AAPL supply chain contact in last 7 days. Case timeline auto-populated with 14 events.",
+             "case_created": {
+                 "case_id": "CASE-E2E-70001",
+                 "case_type": "insider_trading_investigation",
+                 "status": "open",
+                 "priority": "critical",
+                 "sla_initial_review_hrs": 4,
+                 "sla_full_investigation_hrs": 48,
+                 "linked_alert": "ALT-E2E-50001",
+                 "creation_latency_sec": 0.6,
+                 "additional_evidence": [
+                     {"type": "edgar_filing_check", "result": "No Form 4 filed for AAPL by Meridian in 30 days", "suspicious": True},
+                     {"type": "options_activity", "result": "2,400 AAPL Mar-20 $245 calls ($1.2M premium) purchased T-5", "suspicious": True, "notional_premium_usd": 1_200_000},
+                     {"type": "comms_surveillance", "result": "3 flagged Bloomberg chat messages with AAPL supply chain contact in 7 days", "suspicious": True, "messages_flagged": 3}
+                 ],
+                 "timeline_events": 14,
+                 "auto_populated": True
+             }},
+            {"step": 6, "action": "Step 6 — Investigator Review",
+             "timestamp": (now - timedelta(hours=8)).isoformat() + "Z",
+             "result": "Senior Analyst Sarah Chen reviewed case CASE-E2E-70001. Investigation steps: (1) Confirmed 8.4x volume spike is unprecedented for this account (max historical: 3.2x). (2) Verified AAPL earnings on March 20 via corporate event feed. (3) Reviewed options position — $245 calls are 0.9% OTM, purchased 5 days before earnings = classic pre-announcement positioning. (4) Analyzed Bloomberg chat transcripts — 3 messages discuss 'supply chain improvements' and 'better than expected margins' with AAPL insider contact. (5) Network analysis: Meridian PM's college roommate is AAPL VP of Supply Chain (LinkedIn confirmed). (6) Cross-referenced with SEC whistleblower tips — no matching tips. Decision: ESCALATE to Compliance Officer for SAR determination. Total review time: 2.6 hours (within 4-hour SLA).",
+             "investigator_review": {
+                 "reviewer": "Sarah Chen (USR-005)",
+                 "role": "Senior Analyst",
+                 "review_start": (now - timedelta(hours=10, minutes=30)).isoformat() + "Z",
+                 "review_end": (now - timedelta(hours=8)).isoformat() + "Z",
+                 "review_duration_hrs": 2.5,
+                 "within_sla": True,
+                 "findings": [
+                     {"finding": "Volume spike 8.4x (max historical 3.2x)", "severity": "high", "confirmed": True},
+                     {"finding": "AAPL earnings T+2 confirmed via event feed", "severity": "high", "confirmed": True},
+                     {"finding": "$245 calls 0.9% OTM, purchased T-5 before earnings", "severity": "critical", "confirmed": True},
+                     {"finding": "3 Bloomberg chats discuss supply chain improvements with insider", "severity": "critical", "confirmed": True},
+                     {"finding": "PM college roommate is AAPL VP Supply Chain (LinkedIn)", "severity": "critical", "confirmed": True},
+                     {"finding": "No SEC whistleblower tips matching", "severity": "info", "confirmed": True}
+                 ],
+                 "evidence_items_reviewed": 28,
+                 "decision": "ESCALATE",
+                 "escalated_to": "Michael Torres (Compliance Officer)",
+                 "escalation_reason": "Strong indicators of material non-public information (MNPI) trading",
+                 "risk_assessment": "HIGH — multiple corroborating evidence streams"
+             }},
+            {"step": 7, "action": "Step 7 — SAR/STR Filing",
+             "timestamp": (now - timedelta(hours=4)).isoformat() + "Z",
+             "result": "Compliance Officer Michael Torres reviewed and approved SAR filing. SAR details: (1) Filing type: FinCEN SAR (US) + FCA STR (UK, Meridian has London desk). (2) Suspicious activity: potential insider trading in AAPL securities ahead of earnings announcement. (3) Total suspicious amount: $46.13M ($44.93M equity + $1.2M options premium). (4) Narrative auto-generated from case evidence, reviewed and approved by CO. (5) SAR filed with FinCEN via BSA E-Filing system, confirmation number SAR-2026-0318-44291. (6) STR filed with FCA via RegData portal, reference STR-FCA-2026-03-18-8847. (7) Internal SAR flag set on customer and all linked accounts. (8) SEC Enforcement referral packet prepared. Case status: Regulatory Filing Complete.",
+             "sar_str_filing": {
+                 "approver": "Michael Torres (Compliance Officer)",
+                 "approval_timestamp": (now - timedelta(hours=4, minutes=30)).isoformat() + "Z",
+                 "filings": [
+                     {
+                         "type": "FinCEN SAR",
+                         "jurisdiction": "United States",
+                         "filing_system": "BSA E-Filing",
+                         "confirmation_number": "SAR-2026-0318-44291",
+                         "filed_timestamp": (now - timedelta(hours=4)).isoformat() + "Z",
+                         "status": "accepted"
+                     },
+                     {
+                         "type": "FCA STR",
+                         "jurisdiction": "United Kingdom",
+                         "filing_system": "RegData Portal",
+                         "reference": "STR-FCA-2026-03-18-8847",
+                         "filed_timestamp": (now - timedelta(hours=3, minutes=45)).isoformat() + "Z",
+                         "status": "accepted"
+                     }
+                 ],
+                 "suspicious_activity": "Potential insider trading in AAPL ahead of earnings",
+                 "total_suspicious_amount_usd": 46_130_000,
+                 "amount_breakdown": {
+                     "equity_trade": 44_930_000,
+                     "options_premium": 1_200_000
+                 },
+                 "narrative_auto_generated": True,
+                 "narrative_reviewed_by_co": True,
+                 "internal_flags_set": ["customer_sar_flag", "account_sar_flag", "linked_accounts_flag"],
+                 "sec_enforcement_referral": True,
+                 "sec_referral_packet_prepared": True,
+                 "case_status": "regulatory_filing_complete"
+             }}
+        ],
+        "e2e_workflow_summary": {
+            "total_elapsed_hrs": 6.7,
+            "pipeline_stages": 7,
+            "all_stages_completed": True,
+            "stage_latencies": {
+                "trade_execution_sec": 42,
+                "data_ingestion_sec": 1.2,
+                "rule_trigger_sec": 2.8,
+                "alert_generation_sec": 0.4,
+                "case_creation_sec": 0.6,
+                "investigator_review_hrs": 2.5,
+                "sar_filing_hrs": 4.0
+            },
+            "automated_latency_total_sec": 47.0,
+            "human_review_total_hrs": 6.5,
+            "rules_fired": 3,
+            "combined_risk_score": 94,
+            "evidence_items_total": 28,
+            "filings_submitted": 2,
+            "filings_accepted": 2,
+            "total_suspicious_amount_usd": 46_130_000,
+            "all_slas_met": True,
+            "audit_trail_events": 47,
+            "audit_trail_complete": True
+        },
+        "total_steps": 7,
+        "total_duration_hours": 7,
+    }
+
+
 @router.get("/admin/data-sources/actone/customer360/{customer_id}")
 async def actone_customer360_proxy(customer_id: str, current_user=Depends(get_current_user)):
     """Get Customer 360 view for investigation."""
@@ -8621,6 +8852,9 @@ ALERTS = [
     {"alert_id": "ALT-20492", "alert_type": "ml_model_validation", "severity": "low", "status": "validated", "risk_score": 45, "priority": "low",
      "customer_id": "ML-ENSEMBLE-001", "customer_name": "ML Ensemble — Boundary Band Review", "description": "41 ML-triggered alerts in score band 0.65-0.75 (decision boundary uncertainty). 12 confirmed suspicious, 29 false positives from model uncertainty. 2-stage review deployed: auto-route boundary-band scores to senior analyst queue. Post-tuning: all 8 models stable (PSI <0.1), avg AUC 0.947",
      "assigned_to": "USR-005", "rule_id": "RE-003", "created_at": "2026-03-18T07:00:00Z", "updated_at": "2026-03-18T10:00:00Z"},
+    {"alert_id": "ALT-E2E-50001", "alert_type": "potential_insider_trading", "severity": "critical", "status": "sar_filed", "risk_score": 94, "priority": "critical",
+     "customer_id": "CUST-HF-0089", "customer_name": "Meridian Capital Partners LP", "description": "E2E Workflow: BUY 185K AAPL @ $242.87 ($44.93M) 2 days before earnings. Volume 8.4x baseline. 3 rules fired (threshold + pattern + ML LSTM 0.91). Options: 2,400 $245 calls ($1.2M). Bloomberg chats with AAPL supply chain contact. PM linked to AAPL VP (college roommate). SAR filed FinCEN SAR-2026-0318-44291 + FCA STR-FCA-2026-03-18-8847. Total suspicious: $46.13M",
+     "assigned_to": "USR-005", "rule_id": "SUR-INSIDER-003", "created_at": "2026-03-18T09:19:00Z", "updated_at": "2026-03-18T16:00:00Z"},
 ]
 
 
