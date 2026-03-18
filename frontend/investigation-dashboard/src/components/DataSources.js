@@ -2082,10 +2082,10 @@ function CapabilitiesTab({ capabilitiesData, capabilitiesLoading, setCapabilitie
 
           {/* Per-Capability Accordions */}
           {capabilitiesData.results.map((cap, idx) => (
-            <Accordion key={cap.id} defaultExpanded={cap.status !== 'PASS'} sx={{ mb: 1 }}>
+            <Accordion key={cap.id} defaultExpanded={cap.status?.toUpperCase() !== 'PASS'} sx={{ mb: 1 }}>
               <AccordionSummary expandIcon={<ExpandMoreIcon />}>
                 <Box display="flex" alignItems="center" gap={1} width="100%">
-                  <Chip label={cap.status} size="small" color={cap.status === 'PASS' ? 'success' : 'error'} />
+                  <Chip label={cap.status} size="small" color={cap.status?.toUpperCase() === 'PASS' ? 'success' : 'error'} />
                   <Typography fontWeight={600}>{cap.capability}</Typography>
                   <Typography variant="body2" color="text.secondary" sx={{ ml: 'auto', mr: 2 }}>
                     {cap.passed}/{cap.total_checks} checks — {cap.pass_rate} — {cap.verification_latency_ms}ms
@@ -2100,7 +2100,7 @@ function CapabilitiesTab({ capabilitiesData, capabilitiesLoading, setCapabilitie
                 <Box sx={{ mb: 2 }}>
                   {cap.checks.map((ck, ci) => (
                     <Box key={ci} display="flex" alignItems="center" gap={1} sx={{ py: 0.5 }}>
-                      {ck.status === 'PASS' ? <CheckCircleIcon fontSize="small" color="success" /> : <CancelIcon fontSize="small" color="error" />}
+                      {ck.status?.toUpperCase() === 'PASS' ? <CheckCircleIcon fontSize="small" color="success" /> : <CancelIcon fontSize="small" color="error" />}
                       <Typography variant="body2">{ck.check}</Typography>
                     </Box>
                   ))}
@@ -2126,7 +2126,7 @@ function CapabilitiesTab({ capabilitiesData, capabilitiesLoading, setCapabilitie
                               <TableCell><Typography variant="body2" fontWeight={600}>{sc.scenario}</Typography></TableCell>
                               <TableCell><Chip label={sc.rule} size="small" variant="outlined" /></TableCell>
                               <TableCell><Typography variant="body2">{sc.description}</Typography></TableCell>
-                              <TableCell align="center"><Chip label={sc.status} size="small" color={sc.status === 'PASS' ? 'success' : 'error'} /></TableCell>
+                              <TableCell align="center"><Chip label={sc.status} size="small" color={sc.status?.toUpperCase() === 'PASS' ? 'success' : 'error'} /></TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
@@ -2157,7 +2157,7 @@ function CapabilitiesTab({ capabilitiesData, capabilitiesLoading, setCapabilitie
                               <TableCell><Typography variant="body2" fontFamily="monospace">{th.value}</Typography></TableCell>
                               <TableCell><Chip label={th.rule} size="small" variant="outlined" /></TableCell>
                               <TableCell><Chip label={th.type} size="small" color="info" variant="outlined" /></TableCell>
-                              <TableCell align="center"><Chip label={th.status} size="small" color={th.status === 'PASS' ? 'success' : 'error'} /></TableCell>
+                              <TableCell align="center"><Chip label={th.status} size="small" color={th.status?.toUpperCase() === 'PASS' ? 'success' : 'error'} /></TableCell>
                             </TableRow>
                           ))}
                         </TableBody>
