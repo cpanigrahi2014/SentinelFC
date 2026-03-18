@@ -263,6 +263,8 @@ export const actoneScenarioDuplicateTrades = () =>
   api.post('/api/admin/data-sources/actone/scenarios/duplicate-trades');
 export const actoneScenarioTimeSyncIssues = () =>
   api.post('/api/admin/data-sources/actone/scenarios/time-sync-issues');
+export const actoneScenarioRuleEngineTesting = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/rule-engine-testing');
 export const getActoneCustomer360 = (customerId) =>
   api.get(`/api/admin/data-sources/actone/customer360/${customerId}`);
 export const getActoneStateMachine = () =>

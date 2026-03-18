@@ -24,12 +24,13 @@ import InfoIcon from '@mui/icons-material/Info';
 import WarningAmberIcon from '@mui/icons-material/WarningAmber';
 import StorageIcon from '@mui/icons-material/Storage';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import TuneIcon from '@mui/icons-material/Tune';
 import SecurityIcon from '@mui/icons-material/Security';
 import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation, actoneScenarioRogueTrader, actoneScenarioUnusualProfitability, actoneScenarioEquityOptionsManipulation, actoneScenarioFxManipulation, actoneScenarioCommodityManipulation, actoneScenarioRegulatoryCompliance, actoneScenarioMissingData, actoneScenarioDuplicateTrades, actoneScenarioTimeSyncIssues,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation, actoneScenarioRogueTrader, actoneScenarioUnusualProfitability, actoneScenarioEquityOptionsManipulation, actoneScenarioFxManipulation, actoneScenarioCommodityManipulation, actoneScenarioRegulatoryCompliance, actoneScenarioMissingData, actoneScenarioDuplicateTrades, actoneScenarioTimeSyncIssues, actoneScenarioRuleEngineTesting,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -532,6 +533,8 @@ function ScenariosTab() {
       desc: '5,056 duplicates in 4.2M trades (0.12%) → FIX retransmission (51.7%), Kafka rebalance (28.5%), venue corrections (19.8%) → 18 false-positive alerts suppressed → $142.8M notional corrected → idempotency + exactly-once controls deployed' },
     { key: 'timeSyncIssues', label: 'Time Sync Issues Detection', icon: <AccessTimeIcon />, fn: actoneScenarioTimeSyncIssues,
       desc: '6/48 systems drifted (worst 340ms) → 31,847 timestamp violations (0.76%) → 50 surveillance alerts affected (14 FP, 6 FN) → GPS PPS correction → NTP remediation all 6 systems → MiFID II RTS-25 compliant, continuous monitoring' },
+    { key: 'ruleEngineTesting', label: 'Rule Engine Testing', icon: <TuneIcon />, fn: actoneScenarioRuleEngineTesting,
+      desc: '70 rules (38 threshold + 24 pattern + 8 ML). Threshold: 100% boundary accuracy. Pattern: F1 0.971. ML: AUC 0.947. E2E: precision 95.7%→98.1%, recall 97.8%→98.2%, F1 0.968→0.982. FP -57.2%, FN -20.2%. 4 tuning actions, regression verified' },
   ];
 
   return (
