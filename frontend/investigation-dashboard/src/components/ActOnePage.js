@@ -27,7 +27,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -482,6 +482,8 @@ function ScenariosTab() {
       desc: 'Fraud alert → triage → assign → freeze account → contact customer → evidence → close/refer' },
     { key: 'surveillance', label: 'Trading Surveillance', icon: <TrendingUpIcon />, fn: actoneScenarioSurveillance,
       desc: 'Suspicious trade → triage → assign → communication review → escalate → approval → regulatory referral' },
+    { key: 'spoofing', label: 'Spoofing / Layering Detection', icon: <TrendingUpIcon />, fn: actoneScenarioSpoofingLayering,
+      desc: 'Pattern detection (order-to-trade ratio, cancel time, BBO distance) → order book reconstruction → trader profiling (algo vs human) → market impact → edge cases (partial fills) → compliance → SEC/FINRA referral' },
   ];
 
   return (

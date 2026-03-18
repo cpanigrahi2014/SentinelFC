@@ -5,6 +5,7 @@ import random
 import secrets
 from datetime import datetime, timedelta
 from typing import Optional
+from uuid import uuid4
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from pydantic import BaseModel
@@ -2737,6 +2738,7 @@ CAPABILITY_TESTS = [
             {"check": "Scenario: AML Alert Investigation — suspicious transaction alert → triage (high) → assign investigator → collect evidence → timeline review → Customer 360 → draft SAR → file SAR → closed_sar_filed", "status": "pass"},
             {"check": "Scenario: Fraud Case — fraud alert → triage (critical) → assign → freeze account → contact customer → evidence collection → closed (no_action or referred)", "status": "pass"},
             {"check": "Scenario: Trading Surveillance — suspicious trade alert → triage → assign compliance analyst → communication review → escalate to senior compliance → approval → regulatory referral", "status": "pass"},
+            {"check": "Scenario: Spoofing/Layering — pattern detection (order-to-trade ratio, cancel time, BBO distance) → order book reconstruction → trader profiling (algo vs human) → market impact analysis → edge case evaluation (partial fills) → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Multi-case-type support: AML, Fraud, and Surveillance cases managed in unified platform with type-specific workflows", "status": "pass"},
             {"check": "Case listing with filtering: list all cases with case_id, type, status, priority, assignee, timestamps", "status": "pass"},
             {"check": "Case detail retrieval: full case record including all metadata, timeline, evidence count, comment count, SLA status", "status": "pass"},
@@ -4104,7 +4106,7 @@ async def kyc_cases_proxy(current_user=Depends(get_current_user)):
 
 
 @router.post("/admin/data-sources/kyc/onboard")
-async def kyc_onboard_proxy(request: dict = {}, current_user=Depends(get_current_user)):
+async def kyc_onboard_proxy(request: dict = Body(default={}), current_user=Depends(get_current_user)):
     """Simulate KYC onboarding workflow."""
     customer_id = request.get("customer_id", f"CUST-{str(uuid4())[:4].upper()}")
     first_name = request.get("first_name", "New")
@@ -4221,7 +4223,7 @@ async def kyc_periodic_review_proxy(current_user=Depends(get_current_user)):
 
 
 @router.post("/admin/data-sources/kyc/trigger-event")
-async def kyc_trigger_event_proxy(request: dict = {}, current_user=Depends(get_current_user)):
+async def kyc_trigger_event_proxy(request: dict = Body(default={}), current_user=Depends(get_current_user)):
     """Process a KYC trigger event."""
     event_type = request.get("event_type", "sanctions_hit")
     customer_id = request.get("customer_id", "CUST-003")
@@ -4578,6 +4580,73 @@ async def actone_scenario_surveillance_proxy(current_user=Depends(get_current_us
         "evidence_count": 5,
         "timeline_entries": 10,
         "total_duration_hours": 66,
+    }
+
+
+@router.post("/admin/data-sources/actone/scenarios/spoofing-layering")
+async def actone_scenario_spoofing_layering_proxy(current_user=Depends(get_current_user)):
+    """Run Spoofing / Layering surveillance scenario end-to-end."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "Trading Surveillance — Spoofing / Layering Detection",
+        "case_id": "ACT-SCEN-SPF-001",
+        "case_type": "surveillance",
+        "final_status": "closed_referred",
+        "priority": "critical",
+        "detection_metrics": {
+            "order_to_trade_ratio": 47.3,
+            "avg_cancel_time_ms": 120,
+            "orders_far_from_bbo_pct": 82.5,
+            "total_orders_placed": 284,
+            "total_orders_cancelled": 278,
+            "total_executions": 6,
+            "partial_fills_before_cancel": 3,
+            "trader_type": "algorithmic",
+            "algo_id": "ALGO-HFT-042",
+        },
+        "order_book_evidence": [
+            {"time": (now - timedelta(hours=4, minutes=30)).isoformat(), "side": "BUY", "symbol": "AAPL",
+             "qty": 50000, "price": 188.50, "best_ask": 185.20, "distance_from_bbo_pct": 1.78,
+             "status": "cancelled", "cancel_time_ms": 85, "fill_qty": 0},
+            {"time": (now - timedelta(hours=4, minutes=29)).isoformat(), "side": "BUY", "symbol": "AAPL",
+             "qty": 75000, "price": 188.80, "best_ask": 185.22, "distance_from_bbo_pct": 1.93,
+             "status": "cancelled", "cancel_time_ms": 62, "fill_qty": 0},
+            {"time": (now - timedelta(hours=4, minutes=28)).isoformat(), "side": "BUY", "symbol": "AAPL",
+             "qty": 100000, "price": 189.00, "best_ask": 185.25, "distance_from_bbo_pct": 2.02,
+             "status": "cancelled", "cancel_time_ms": 110, "fill_qty": 200},
+            {"time": (now - timedelta(hours=4, minutes=27)).isoformat(), "side": "SELL", "symbol": "AAPL",
+             "qty": 5000, "price": 185.30, "best_bid": 185.18, "distance_from_bbo_pct": 0.06,
+             "status": "filled", "cancel_time_ms": None, "fill_qty": 5000},
+            {"time": (now - timedelta(hours=4, minutes=26)).isoformat(), "side": "BUY", "symbol": "AAPL",
+             "qty": 60000, "price": 188.90, "best_ask": 185.35, "distance_from_bbo_pct": 1.92,
+             "status": "cancelled", "cancel_time_ms": 145, "fill_qty": 150},
+        ],
+        "steps": [
+            {"step": 1, "action": "pattern_detection",
+             "result": "Surveillance engine flagged ALGO-HFT-042: order-to-trade ratio 47.3 (threshold: 10), 82.5% orders >1.5% from BBO, avg cancel 120ms",
+             "status_after": "triaged", "timestamp": (now - timedelta(hours=4)).isoformat()},
+            {"step": 2, "action": "order_book_reconstruction",
+             "result": "Reconstructed order book: 284 large buy orders placed over 12 min, 278 cancelled within 62-210ms, creating illusion of demand",
+             "status_after": "evidence_gathering", "timestamp": (now - timedelta(hours=3, minutes=30)).isoformat()},
+            {"step": 3, "action": "trader_profiling",
+             "result": "Identified as algo bot ALGO-HFT-042, registered to Apex Quant Trading LLC. 3 partial fills (350 shares) before cancel — not legitimate market-making",
+             "status_after": "in_investigation", "timestamp": (now - timedelta(hours=3)).isoformat()},
+            {"step": 4, "action": "market_impact_analysis",
+             "result": "AAPL bid inflated $3.75 (+2.02%) during spoofing window. Trader simultaneously sold 5,000 shares at inflated price via separate venue",
+             "status_after": "evidence_gathering", "timestamp": (now - timedelta(hours=2, minutes=30)).isoformat()},
+            {"step": 5, "action": "edge_case_evaluation",
+             "result": "Algo vs human: confirmed algorithmic (sub-200ms cancel pattern). Partial fills: 3 fills (350 shares) — incidental, not intended execution",
+             "status_after": "escalated", "timestamp": (now - timedelta(hours=2)).isoformat()},
+            {"step": 6, "action": "compliance_review",
+             "result": "Head of Market Surveillance confirmed Dodd-Frank §747 / MAR Art.12 spoofing violation. Recommended SEC/FINRA referral",
+             "status_after": "pending_approval", "timestamp": (now - timedelta(hours=1, minutes=30)).isoformat()},
+            {"step": 7, "action": "regulatory_referral",
+             "result": "Referred to SEC/FINRA with full order book evidence, trader profile, market impact analysis. Trading privileges suspended",
+             "status_after": "closed_referred", "timestamp": (now - timedelta(hours=1)).isoformat()},
+        ],
+        "evidence_count": 8,
+        "timeline_entries": 14,
+        "total_duration_hours": 3,
     }
 
 
@@ -5594,6 +5663,15 @@ ALERTS = [
     {"alert_id": "ALT-20210", "alert_type": "synthetic_identity", "severity": "high", "status": "assigned", "risk_score": 84, "priority": "high",
      "customer_id": "SYNTH-GRP-01", "customer_name": "Synthetic ID Cluster #14", "description": "8 accounts opened in 2 weeks sharing device fingerprints and IPs",
      "assigned_to": "USR-003", "rule_id": "FRD-010", "created_at": "2026-02-28T10:00:00Z", "updated_at": "2026-03-14T08:00:00Z"},
+    {"alert_id": "ALT-20270", "alert_type": "spoofing_layering", "severity": "critical", "status": "escalated", "risk_score": 96, "priority": "critical",
+     "customer_id": "TDR-ALGO-042", "customer_name": "Apex Quant Trading LLC (ALGO-HFT-042)", "description": "Spoofing detected: 284 large buy orders cancelled within 62-210ms, order-to-trade ratio 47.3, 82.5% orders >1.5% from BBO. AAPL bid inflated 2.02%",
+     "assigned_to": "USR-005", "rule_id": "SUR-001", "created_at": "2026-03-17T14:00:00Z", "updated_at": "2026-03-17T18:00:00Z"},
+    {"alert_id": "ALT-20271", "alert_type": "spoofing_layering", "severity": "high", "status": "assigned", "risk_score": 88, "priority": "high",
+     "customer_id": "TDR-HMN-019", "customer_name": "Marcus Webb (Manual Trader)", "description": "Layering pattern: 45 sell orders stacked $0.50-$2.00 above best ask on TSLA, 42 cancelled within 300-800ms. Partial fills on 3 orders before cancel",
+     "assigned_to": "USR-003", "rule_id": "SUR-002", "created_at": "2026-03-16T10:00:00Z", "updated_at": "2026-03-17T09:00:00Z"},
+    {"alert_id": "ALT-20272", "alert_type": "spoofing_layering", "severity": "high", "status": "new", "risk_score": 85, "priority": "high",
+     "customer_id": "TDR-ALGO-087", "customer_name": "Velocity Capital Partners (ALGO-MM-087)", "description": "Potential spoofing vs legitimate market-making: order-to-trade ratio 18.2 (threshold 10), but 60% orders within 0.3% of BBO. Needs manual review",
+     "assigned_to": None, "rule_id": "SUR-001", "created_at": "2026-03-17T16:00:00Z", "updated_at": "2026-03-17T16:00:00Z"},
 ]
 
 
