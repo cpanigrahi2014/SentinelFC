@@ -255,6 +255,8 @@ export const actoneScenarioFxManipulation = () =>
   api.post('/api/admin/data-sources/actone/scenarios/fx-manipulation');
 export const actoneScenarioCommodityManipulation = () =>
   api.post('/api/admin/data-sources/actone/scenarios/commodity-manipulation');
+export const actoneScenarioRegulatoryCompliance = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/regulatory-compliance');
 export const getActoneCustomer360 = (customerId) =>
   api.get(`/api/admin/data-sources/actone/customer360/${customerId}`);
 export const getActoneStateMachine = () =>

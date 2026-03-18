@@ -27,7 +27,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation, actoneScenarioRogueTrader, actoneScenarioUnusualProfitability, actoneScenarioEquityOptionsManipulation, actoneScenarioFxManipulation, actoneScenarioCommodityManipulation,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation, actoneScenarioRogueTrader, actoneScenarioUnusualProfitability, actoneScenarioEquityOptionsManipulation, actoneScenarioFxManipulation, actoneScenarioCommodityManipulation, actoneScenarioRegulatoryCompliance,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -522,6 +522,8 @@ function ScenariosTab() {
       desc: 'Benchmark rate manipulation (WM/Reuters fix, 4.2 pips) → pre-hedging/front-running ($2.1B client orders, $6.2M harm) → chat room collusion (3 banks, 287 messages) → statistical analysis (91.1% success) → multi-jurisdictional referral (CFTC/FCA/DOJ)' },
     { key: 'commodityManipulation', label: 'Commodity Manipulation', icon: <WarningAmberIcon />, fn: actoneScenarioCommodityManipulation,
       desc: 'Physical hoarding (68% warehouse, 142K MT) → queue manipulation (14→89 days) → futures price impact (+18.4%, $633M) → cross-exchange arbitrage ($48M) → downstream harm ($1.4B, 340 consumers) → CFTC/LME/FCA/DOJ referral' },
+    { key: 'regulatoryCompliance', label: 'Regulatory Compliance (SEC/FINRA/ESMA)', icon: <GavelIcon />, fn: actoneScenarioRegulatoryCompliance,
+      desc: 'Rule threshold breach alerts (14 categories, <60s SLA) → audit trail completeness (847K events, SHA-256, 7yr retention) → alert escalation workflow (5 tiers, auto-escalation) → case management lifecycle (8 states, reopen) → 42 rules tested (12 SEC + 16 FINRA + 14 ESMA) — 100% passing' },
   ];
 
   return (

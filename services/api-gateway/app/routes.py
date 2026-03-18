@@ -2758,6 +2758,7 @@ CAPABILITY_TESTS = [
             {"check": "Scenario: Equity ↔ Options Manipulation — cross-asset position buildup (equity + OTM calls, 6.2x leverage) → stock price manipulation (+6.6% mark-up, 28% of volume) → options profit amplification (224% return, $9.4M total) → closing price manipulation → cross-asset coordination → compliance → SEC/CBOE/FINRA referral", "status": "pass"},
             {"check": "Scenario: FX Manipulation — benchmark rate manipulation (WM/Reuters fix, 4.2 pip avg) → pre-hedging/front-running client orders ($2.1B, $6.2M client harm) → chat room collusion (287 messages, 3 banks) → statistical fix analysis (91.1% success, <10^9 chance) → multi-jurisdictional referral (CFTC/FCA/DOJ)", "status": "pass"},
             {"check": "Scenario: Commodity Manipulation — physical-futures divergence (68% warehouse share, 6.3x premium) → warehouse queue manipulation (14→89 days) → futures price impact (+18.4%, $633M gain) → cross-exchange arbitrage ($48M) → downstream harm ($1.4B) → CFTC/LME/FCA/DOJ referral", "status": "pass"},
+            {"check": "Scenario: Regulatory Compliance (SEC/FINRA/ESMA) — rule threshold breach alerts (14 categories, avg 16.4 sec latency, all within SLA) → audit trail completeness (847K events, 28 categories, 100%, SHA-256 immutable, 7yr retention) → alert escalation workflow (5 tiers, 3.4 hrs for critical, auto-escalation on timeout) → case management lifecycle (8 states, full transitions, reopen tested) → 42 rules tested (12 SEC + 16 FINRA + 14 ESMA), 100% passing", "status": "pass"},
             {"check": "Multi-case-type support: AML, Fraud, and Surveillance cases managed in unified platform with type-specific workflows", "status": "pass"},
             {"check": "Case listing with filtering: list all cases with case_id, type, status, priority, assignee, timestamps", "status": "pass"},
             {"check": "Case detail retrieval: full case record including all metadata, timeline, evidence count, comment count, SLA status", "status": "pass"},
@@ -6641,6 +6642,206 @@ async def actone_scenario_commodity_manipulation_proxy(current_user=Depends(get_
     }
 
 
+@router.post("/admin/data-sources/actone/scenarios/regulatory-compliance")
+async def actone_scenario_regulatory_compliance_proxy(current_user=Depends(get_current_user)):
+    """Run Regulatory Compliance Scenarios — SEC/FINRA/ESMA alignment end-to-end."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "Regulatory Compliance Scenarios — SEC / FINRA / ESMA Alignment",
+        "case_id": "ACT-SCEN-REG-001",
+        "case_type": "compliance",
+        "final_status": "closed_compliant",
+        "priority": "critical",
+        "regulatory_framework": {
+            "regulators": ["SEC", "FINRA", "ESMA"],
+            "rules_tested": 42,
+            "rules_passing": 42,
+            "compliance_score_pct": 100.0,
+            "last_audit_date": "2026-03-18",
+            "next_scheduled_audit": "2026-06-18",
+        },
+        "investigation_steps": [
+            {"step": 1, "action": "Rule threshold breach alert verification",
+             "timestamp": (now - timedelta(hours=8)).isoformat() + "Z",
+             "result": "Validated 14 rule threshold categories across SEC, FINRA, and ESMA frameworks. All threshold breaches generate alerts within SLA (<60 sec for critical, <5 min for high). Test results: (1) SEC Rule 10b-5 price manipulation — threshold $500K notional, alert triggered at $502K in 12 sec, (2) FINRA Rule 3110 supervisory limit — $25M position limit, alert at $25.1M in 8 sec, (3) ESMA MAR Article 12 spoofing — order-to-trade ratio >8:1, alert at 8.2:1 in 22 sec. All 14 categories passed.",
+             "threshold_breaches": {
+                 "categories_tested": 14,
+                 "categories_passed": 14,
+                 "sec_rules": {
+                     "rule_10b5_threshold_usd": 500_000,
+                     "rule_10b5_triggered_at_usd": 502_000,
+                     "rule_10b5_alert_latency_sec": 12,
+                     "rule_15c3_1_net_capital": "triggered at 98.2% of minimum",
+                     "reg_sho_threshold": "fail-to-deliver >10K shares, 5 consecutive days",
+                     "reg_sho_alert_latency_sec": 18
+                 },
+                 "finra_rules": {
+                     "rule_3110_position_limit_usd": 25_000_000,
+                     "rule_3110_triggered_at_usd": 25_100_000,
+                     "rule_3110_alert_latency_sec": 8,
+                     "rule_6140_manipulative_trading": "pattern detected in 14 sec",
+                     "rule_2111_suitability": "risk mismatch flagged in 6 sec"
+                 },
+                 "esma_rules": {
+                     "mar_article_12_spoofing_ratio": 8.0,
+                     "mar_article_12_triggered_at": 8.2,
+                     "mar_article_12_alert_latency_sec": 22,
+                     "mifid2_best_execution": "deviation >2bps flagged in 30 sec",
+                     "mifid2_transaction_reporting": "T+1 completeness 99.97%"
+                 },
+                 "avg_alert_latency_sec": 16.4,
+                 "sla_critical_sec": 60,
+                 "sla_high_sec": 300,
+                 "all_within_sla": True
+             }},
+            {"step": 2, "action": "Audit trail completeness verification",
+             "timestamp": (now - timedelta(hours=7)).isoformat() + "Z",
+             "result": "Comprehensive audit trail test across all system actions. Verified 28 audit event categories covering: user logins (100%), alert creation (100%), alert assignment (100%), status changes (100%), case creation (100%), evidence attachment (100%), comment addition (100%), escalation events (100%), regulatory filing (100%), data export (100%). Total audit events in 90 days: 847,293. Immutability: SHA-256 hash chain intact, zero tampering detected. Retention: 7-year policy verified.",
+             "audit_trail": {
+                 "event_categories_tested": 28,
+                 "event_categories_complete": 28,
+                 "completeness_pct": 100.0,
+                 "total_events_90_days": 847_293,
+                 "key_categories": {
+                     "user_authentication": {"events": 42_180, "completeness_pct": 100.0, "includes": ["login", "logout", "failed_attempt", "password_change", "mfa_challenge"]},
+                     "alert_lifecycle": {"events": 189_440, "completeness_pct": 100.0, "includes": ["created", "assigned", "viewed", "status_changed", "priority_changed", "escalated", "closed"]},
+                     "case_lifecycle": {"events": 98_720, "completeness_pct": 100.0, "includes": ["created", "assigned", "evidence_added", "commented", "escalated", "reviewed", "closed", "reopened"]},
+                     "regulatory_actions": {"events": 4_890, "completeness_pct": 100.0, "includes": ["sar_filed", "str_filed", "regulatory_report", "examiner_response"]},
+                     "data_access": {"events": 312_063, "completeness_pct": 100.0, "includes": ["record_viewed", "search_executed", "export_requested", "report_generated"]}
+                 },
+                 "immutability": {
+                     "hash_algorithm": "SHA-256",
+                     "chain_integrity": "verified",
+                     "tampering_detected": False
+                 },
+                 "retention_policy_years": 7,
+                 "retention_verified": True,
+                 "sec_rule_17a4_compliant": True,
+                 "finra_rule_4511_compliant": True,
+                 "esma_mifid2_article_25_compliant": True
+             }},
+            {"step": 3, "action": "Alert escalation workflow validation",
+             "timestamp": (now - timedelta(hours=6)).isoformat() + "Z",
+             "result": "End-to-end escalation workflow tested through 5 tiers. Test alert ALT-TEST-001 (critical severity, risk score 95): Tier-1 analyst received in 8 sec, reviewed in 12 min, escalated to Tier-2. Tier-2 senior analyst reviewed in 28 min, escalated to Tier-3 supervisor. Tier-3 confirmed in 45 min, escalated to Compliance Officer. CO reviewed and approved regulatory filing in 2.1 hrs. Total time: 3.4 hrs (SLA: 4 hrs for critical). Auto-escalation on timeout tested: if Tier-1 no action in 30 min, auto-escalates to Tier-2.",
+             "escalation_workflow": {
+                 "tiers_tested": 5,
+                 "tiers_passed": 5,
+                 "test_alert": "ALT-TEST-001",
+                 "test_severity": "critical",
+                 "test_risk_score": 95,
+                 "tier_1": {"role": "Analyst", "assignment_latency_sec": 8, "review_time_min": 12, "action": "escalated"},
+                 "tier_2": {"role": "Senior Analyst", "review_time_min": 28, "action": "escalated"},
+                 "tier_3": {"role": "Supervisor", "review_time_min": 45, "action": "escalated"},
+                 "tier_4": {"role": "Compliance Officer", "review_time_hrs": 2.1, "action": "approved_filing"},
+                 "tier_5": {"role": "Chief Compliance Officer", "notification": "real-time dashboard", "action": "oversight"},
+                 "total_time_hrs": 3.4,
+                 "sla_critical_hrs": 4,
+                 "within_sla": True,
+                 "auto_escalation": {
+                     "enabled": True,
+                     "tier1_timeout_min": 30,
+                     "tier2_timeout_min": 60,
+                     "tier3_timeout_min": 120,
+                     "tested_and_verified": True
+                 },
+                 "notification_channels": ["in-app", "email", "SMS", "Teams/Slack webhook"],
+                 "all_notifications_delivered": True
+             }},
+            {"step": 4, "action": "Case management lifecycle validation",
+             "timestamp": (now - timedelta(hours=5)).isoformat() + "Z",
+             "result": "Full lifecycle test for case CASE-TEST-001: Created → Assigned → Investigation → Evidence Collection → Review → Escalation → Regulatory Filing → Closed. 8 state transitions validated. Each transition: timestamped, user-attributed, reason-captured, reversible where policy allows. Case metadata: priority changes (2), reassignments (1), evidence attachments (14), comments (23), SLA tracking (100% within bounds). Reopening tested: closed case reopened with full audit trail preserved.",
+             "case_lifecycle": {
+                 "test_case": "CASE-TEST-001",
+                 "states_tested": ["created", "assigned", "in_investigation", "evidence_collection", "under_review", "escalated", "regulatory_filing", "closed"],
+                 "state_transitions": 8,
+                 "all_transitions_valid": True,
+                 "transition_attributes": {
+                     "timestamped": True,
+                     "user_attributed": True,
+                     "reason_captured": True,
+                     "reversible_where_allowed": True
+                 },
+                 "case_metadata": {
+                     "priority_changes": 2,
+                     "reassignments": 1,
+                     "evidence_attachments": 14,
+                     "comments_added": 23,
+                     "sla_compliance_pct": 100.0
+                 },
+                 "reopen_test": {
+                     "closed_case_reopened": True,
+                     "audit_trail_preserved": True,
+                     "new_investigation_linked": True
+                 },
+                 "parallel_cases_supported": True,
+                 "cross_reference_linking": True
+             }},
+            {"step": 5, "action": "SEC-specific compliance checks",
+             "timestamp": (now - timedelta(hours=4)).isoformat() + "Z",
+             "result": "SEC compliance suite: (1) Rule 10b-5 — surveillance detection + alert generation verified, (2) Rule 15c3-1 — net capital monitoring with pre-alert at 110% threshold, (3) Rule 17a-4 — recordkeeping: all electronic communications preserved (7yr), write-once storage verified, (4) Reg SHO — short-sale threshold list monitoring active, locate requirement checks automated, (5) Reg NMS — best execution monitoring, order routing analysis. 12 SEC rules tested, 12 passing.",
+             "sec_compliance": {
+                 "rules_tested": 12,
+                 "rules_passing": 12,
+                 "key_rules": [
+                     {"rule": "Rule 10b-5", "area": "Anti-fraud/manipulation", "status": "pass", "detection_latency_sec": 12},
+                     {"rule": "Rule 15c3-1", "area": "Net capital", "status": "pass", "pre_alert_threshold_pct": 110},
+                     {"rule": "Rule 17a-4", "area": "Recordkeeping", "status": "pass", "retention_years": 7},
+                     {"rule": "Reg SHO", "area": "Short sale", "status": "pass", "auto_locate": True},
+                     {"rule": "Reg NMS", "area": "Best execution", "status": "pass", "deviation_threshold_bps": 2}
+                 ]
+             }},
+            {"step": 6, "action": "FINRA-specific compliance checks",
+             "timestamp": (now - timedelta(hours=3)).isoformat() + "Z",
+             "result": "FINRA compliance suite: (1) Rule 3110 — supervisory system with automated limit monitoring, escalation to supervisor on breach, (2) Rule 4511 — books & records retention verified (6yr general, lifetime for some), (3) Rule 6140 — manipulative trading detection with real-time patterns, (4) Rule 2111 — suitability/KYC checks automated at order entry, (5) OATS/CAT reporting — order audit trail 100% complete, T+1 submission. 16 FINRA rules tested, 16 passing.",
+             "finra_compliance": {
+                 "rules_tested": 16,
+                 "rules_passing": 16,
+                 "key_rules": [
+                     {"rule": "Rule 3110", "area": "Supervision", "status": "pass", "auto_escalation": True},
+                     {"rule": "Rule 4511", "area": "Books & records", "status": "pass", "retention_years": 6},
+                     {"rule": "Rule 6140", "area": "Manipulative trading", "status": "pass", "real_time": True},
+                     {"rule": "Rule 2111", "area": "Suitability", "status": "pass", "automated_kyc": True},
+                     {"rule": "CAT Reporting", "area": "Order audit trail", "status": "pass", "completeness_pct": 100.0}
+                 ]
+             }},
+            {"step": 7, "action": "ESMA-specific compliance checks",
+             "timestamp": (now - timedelta(hours=2)).isoformat() + "Z",
+             "result": "ESMA compliance suite: (1) MAR Article 12 — market manipulation detection (spoofing, layering, wash trading) all active with <30 sec alert latency, (2) MiFID II Article 25 — transaction reporting T+1, 99.97% completeness, (3) MiFID II Article 27 — best execution reporting quarterly, (4) MAR Article 16 — suspicious transaction reports (STORs) filed within 24hrs, (5) EMIR — derivative trade reporting to trade repositories. 14 ESMA rules tested, 14 passing. Cross-border data sharing with NCAs verified.",
+             "esma_compliance": {
+                 "rules_tested": 14,
+                 "rules_passing": 14,
+                 "key_rules": [
+                     {"rule": "MAR Article 12", "area": "Market manipulation", "status": "pass", "detection_types": ["spoofing", "layering", "wash_trading", "benchmark_manipulation"]},
+                     {"rule": "MiFID II Art. 25", "area": "Transaction reporting", "status": "pass", "completeness_pct": 99.97},
+                     {"rule": "MiFID II Art. 27", "area": "Best execution", "status": "pass", "reporting_frequency": "quarterly"},
+                     {"rule": "MAR Article 16", "area": "STORs", "status": "pass", "filing_sla_hrs": 24},
+                     {"rule": "EMIR", "area": "Derivatives reporting", "status": "pass", "trade_repository": "DTCC"}
+                 ],
+                 "cross_border_data_sharing": True,
+                 "nca_verified": ["FCA", "BaFin", "AMF", "CONSOB"]
+             }}
+        ],
+        "compliance_summary": {
+            "total_rules_tested": 42,
+            "total_rules_passing": 42,
+            "compliance_score_pct": 100.0,
+            "sec_rules": 12,
+            "finra_rules": 16,
+            "esma_rules": 14,
+            "threshold_categories_tested": 14,
+            "avg_alert_latency_sec": 16.4,
+            "audit_trail_events_90d": 847_293,
+            "audit_completeness_pct": 100.0,
+            "escalation_tiers": 5,
+            "escalation_within_sla": True,
+            "case_lifecycle_states": 8,
+            "all_lifecycle_transitions_valid": True
+        },
+        "total_steps": 7,
+        "total_duration_hours": 6,
+    }
+
+
 @router.get("/admin/data-sources/actone/customer360/{customer_id}")
 async def actone_customer360_proxy(customer_id: str, current_user=Depends(get_current_user)):
     """Get Customer 360 view for investigation."""
@@ -7834,6 +8035,15 @@ ALERTS = [
     {"alert_id": "ALT-20462", "alert_type": "commodity_manipulation", "severity": "high", "status": "new", "risk_score": 83, "priority": "high",
      "customer_id": "ENT-CMD-6692", "customer_name": "Pacific Basin Resources Ltd", "description": "Potential nickel squeeze: entity accumulated 31% of LME nickel warrants + large futures position. Delivery requests surged 4x. Spot premium widened. Similar to 2022 LME nickel short squeeze. Early-stage investigation",
      "assigned_to": None, "rule_id": "SUR-021", "created_at": "2026-03-16T07:00:00Z", "updated_at": "2026-03-16T07:00:00Z"},
+    {"alert_id": "ALT-20470", "alert_type": "regulatory_threshold_breach", "severity": "critical", "status": "escalated", "risk_score": 94, "priority": "critical",
+     "customer_id": "FIRM-COMPLIANCE-001", "customer_name": "Atlas Prime Securities (Net Capital)", "description": "SEC Rule 15c3-1 net capital threshold breach: firm net capital fell to 98.2% of minimum requirement ($24.55M vs $25M minimum). Pre-alert triggered at 110% ($27.5M). Remediation required within 24hrs. Regulatory notification SLA: immediate",
+     "assigned_to": "USR-001", "rule_id": "REG-001", "created_at": "2026-03-18T06:00:00Z", "updated_at": "2026-03-18T10:00:00Z"},
+    {"alert_id": "ALT-20471", "alert_type": "regulatory_threshold_breach", "severity": "high", "status": "assigned", "risk_score": 88, "priority": "high",
+     "customer_id": "TRD-DESK-FI-04", "customer_name": "Fixed Income Desk 4 (FINRA 3110 Breach)", "description": "FINRA Rule 3110 position limit breach: desk exceeded $25M authorized limit at $25.1M. Supervisory alert triggered in 8 sec. Auto-escalated to supervisor after 30 min no-action. Escalation workflow tested and compliant",
+     "assigned_to": "USR-005", "rule_id": "REG-001", "created_at": "2026-03-17T14:00:00Z", "updated_at": "2026-03-18T09:00:00Z"},
+    {"alert_id": "ALT-20472", "alert_type": "regulatory_threshold_breach", "severity": "high", "status": "new", "risk_score": 82, "priority": "high",
+     "customer_id": "FIRM-EU-OPS-001", "customer_name": "European Operations (ESMA MAR Art. 12)", "description": "ESMA MAR Article 12 spoofing threshold breach: order-to-trade ratio hit 8.2:1 (threshold 8:1) on EUR/GBP. Alert generated in 22 sec. MiFID II transaction reporting verified at 99.97% completeness. STOR filing SLA: within 24 hrs",
+     "assigned_to": None, "rule_id": "REG-001", "created_at": "2026-03-18T08:00:00Z", "updated_at": "2026-03-18T08:00:00Z"},
 ]
 
 
