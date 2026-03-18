@@ -27,7 +27,7 @@ import TrendingUpIcon from '@mui/icons-material/TrendingUp';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import {
   getActoneDashboard, getActoneCases, actoneTriage,
-  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation, actoneScenarioRogueTrader, actoneScenarioUnusualProfitability,
+  actoneScenarioAml, actoneScenarioFraud, actoneScenarioSurveillance, actoneScenarioSpoofingLayering, actoneScenarioWashTrading, actoneScenarioPumpAndDump, actoneScenarioMarkingTheClose, actoneScenarioQuoteStuffing, actoneScenarioInsiderBeforeNews, actoneScenarioInsiderConnectedAccounts, actoneScenarioInsiderInfoLeakage, actoneScenarioCoordinatedTrading, actoneScenarioCircularTrading, actoneScenarioCrossMarketManipulation, actoneScenarioMomentumIgnition, actoneScenarioLatencyArbitrage, actoneScenarioOrderBookImbalance, actoneScenarioTraderBehaviorDeviation, actoneScenarioRogueTrader, actoneScenarioUnusualProfitability, actoneScenarioEquityOptionsManipulation, actoneScenarioFxManipulation, actoneScenarioCommodityManipulation,
   getActoneCustomer360, getActoneStateMachine, getActoneAudit, getActoneInfo,
 } from '../services/api';
 
@@ -516,6 +516,12 @@ function ScenariosTab() {
       desc: 'Limit breach detection (5.72x authorized, 7 breaches) → overnight exposure spike ($8.2M→$97M) → unauthorized instruments (92% off-mandate) → control circumvention (account splitting, DMA bypass) → loss concealment ($21.6M) → compliance → SEC/FINRA/DOJ referral' },
     { key: 'unusualProfitability', label: 'Unusual Profitability Detection', icon: <TrendingUpIcon />, fn: actoneScenarioUnusualProfitability,
       desc: 'Sharpe ratio spike (6.84 vs 1.35 peer, 4.06σ) → win-rate anomaly (94.2% vs 54.8% peer, 100% on event days) → profit decomposition (7.8x peer) → pre-announcement pattern → information source investigation → statistical impossibility (<10^-18) → SEC/FINRA/DOJ referral' },
+    { key: 'equityOptionsManipulation', label: 'Equity ↔ Options Manipulation', icon: <SecurityIcon />, fn: actoneScenarioEquityOptionsManipulation,
+      desc: 'Cross-asset position buildup (equity + OTM calls, 6.2x leverage) → stock price manipulation (+6.6%, 28% volume) → options profit amplification (224%, $9.4M) → closing price manipulation → cross-asset coordination → compliance → SEC/CBOE/FINRA referral' },
+    { key: 'fxManipulation', label: 'FX Benchmark Manipulation', icon: <SecurityIcon />, fn: actoneScenarioFxManipulation,
+      desc: 'Benchmark rate manipulation (WM/Reuters fix, 4.2 pips) → pre-hedging/front-running ($2.1B client orders, $6.2M harm) → chat room collusion (3 banks, 287 messages) → statistical analysis (91.1% success) → multi-jurisdictional referral (CFTC/FCA/DOJ)' },
+    { key: 'commodityManipulation', label: 'Commodity Manipulation', icon: <WarningAmberIcon />, fn: actoneScenarioCommodityManipulation,
+      desc: 'Physical hoarding (68% warehouse, 142K MT) → queue manipulation (14→89 days) → futures price impact (+18.4%, $633M) → cross-exchange arbitrage ($48M) → downstream harm ($1.4B, 340 consumers) → CFTC/LME/FCA/DOJ referral' },
   ];
 
   return (

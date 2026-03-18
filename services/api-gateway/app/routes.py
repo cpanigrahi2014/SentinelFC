@@ -2755,6 +2755,9 @@ CAPABILITY_TESTS = [
             {"check": "Scenario: Trader Behavior Deviation — new instrument detection (crypto-adjacent sector, 0% historical overlap) → sudden volume increase (3.11x, Z-score 4.8) → trading time shift (pre/after-market, 62% outside normal) → AI behavioral clustering (94.2% dissimilar, anomaly 96/100) → event correlation → compliance review → SEC/FINRA referral", "status": "pass"},
             {"check": "Scenario: Rogue Trader Detection — limit breach detection (5.72x authorized, 7 breaches in 12 days) → overnight exposure spike ($8.2M→$97M, VaR 23.3x) → unauthorized instruments (92% off-mandate) → control circumvention (account splitting, DMA bypass, P&L manipulation) → loss concealment ($21.6M) → compliance review → SEC/FINRA/DOJ referral", "status": "pass"},
             {"check": "Scenario: Unusual Profitability — Sharpe ratio spike (1.42→6.84, 4.06σ above peers) → win-rate anomaly (94.2% vs 54.8% peer, 100% on event days) → profit decomposition (7.8x peer avg) → pre-announcement pattern (1-3 days lead) → information source investigation → statistical impossibility (<10^-18) → SEC/FINRA/DOJ referral", "status": "pass"},
+            {"check": "Scenario: Equity ↔ Options Manipulation — cross-asset position buildup (equity + OTM calls, 6.2x leverage) → stock price manipulation (+6.6% mark-up, 28% of volume) → options profit amplification (224% return, $9.4M total) → closing price manipulation → cross-asset coordination → compliance → SEC/CBOE/FINRA referral", "status": "pass"},
+            {"check": "Scenario: FX Manipulation — benchmark rate manipulation (WM/Reuters fix, 4.2 pip avg) → pre-hedging/front-running client orders ($2.1B, $6.2M client harm) → chat room collusion (287 messages, 3 banks) → statistical fix analysis (91.1% success, <10^9 chance) → multi-jurisdictional referral (CFTC/FCA/DOJ)", "status": "pass"},
+            {"check": "Scenario: Commodity Manipulation — physical-futures divergence (68% warehouse share, 6.3x premium) → warehouse queue manipulation (14→89 days) → futures price impact (+18.4%, $633M gain) → cross-exchange arbitrage ($48M) → downstream harm ($1.4B) → CFTC/LME/FCA/DOJ referral", "status": "pass"},
             {"check": "Multi-case-type support: AML, Fraud, and Surveillance cases managed in unified platform with type-specific workflows", "status": "pass"},
             {"check": "Case listing with filtering: list all cases with case_id, type, status, priority, assignee, timestamps", "status": "pass"},
             {"check": "Case detail retrieval: full case record including all metadata, timeline, evidence count, comment count, SLA status", "status": "pass"},
@@ -6293,6 +6296,351 @@ async def actone_scenario_unusual_profitability_proxy(current_user=Depends(get_c
     }
 
 
+@router.post("/admin/data-sources/actone/scenarios/equity-options-manipulation")
+async def actone_scenario_equity_options_manipulation_proxy(current_user=Depends(get_current_user)):
+    """Run Cross-Asset Surveillance — Equity↔Options Manipulation scenario end-to-end."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "Cross-Asset / Multi-Asset Surveillance — Equity ↔ Options Manipulation",
+        "case_id": "ACT-SCEN-EOM-001",
+        "case_type": "surveillance",
+        "final_status": "closed_referred",
+        "priority": "critical",
+        "subject_profile": {
+            "account_id": "ACC-EQ-7734",
+            "name": "Titan Structured Strategies LLC",
+            "account_type": "proprietary",
+            "primary_instruments": ["equities", "listed options"],
+            "exchanges": ["NYSE", "CBOE", "PHLX"],
+        },
+        "investigation_steps": [
+            {"step": 1, "action": "Cross-asset position buildup detection",
+             "timestamp": (now - timedelta(hours=7)).isoformat() + "Z",
+             "result": "Account accumulated 420K shares of CRWD ($112/share) over 4 days while simultaneously buying 3,200 OTM call options (strike $120, expiry 14 days). Equity position: $47M. Options premium: $2.8M. Combined delta exposure: $83M. Options provide 6.2x leverage on upside. Buildup timed 5 days before earnings.",
+             "position_buildup": {
+                 "equity_shares": 420_000,
+                 "equity_price": 112,
+                 "equity_notional_usd": 47_040_000,
+                 "options_contracts": 3_200,
+                 "option_type": "OTM calls",
+                 "strike": 120,
+                 "days_to_expiry": 14,
+                 "premium_paid_usd": 2_800_000,
+                 "combined_delta_exposure_usd": 83_000_000,
+                 "leverage_multiple": 6.2,
+                 "buildup_days": 4
+             }},
+            {"step": 2, "action": "Stock price manipulation detection",
+             "timestamp": (now - timedelta(hours=6, minutes=30)).isoformat() + "Z",
+             "result": "After position buildup, account executed aggressive buy program: 180K shares in final 30 min of trading day (28% of volume). VWAP impact: +2.8%. Closing price pushed from $112→$115.14. Options delta surged from 0.22→0.48 (doubled). Pattern repeated on 3 consecutive days, pushing stock to $119.40 (mark-up of 6.6%).",
+             "manipulation_activity": {
+                 "aggressive_buys_shares": 180_000,
+                 "pct_of_volume": 28,
+                 "vwap_impact_pct": 2.8,
+                 "price_before": 112.00,
+                 "price_after_day1": 115.14,
+                 "price_after_day3": 119.40,
+                 "total_markup_pct": 6.6,
+                 "option_delta_before": 0.22,
+                 "option_delta_after": 0.48,
+                 "consecutive_days": 3
+             }},
+            {"step": 3, "action": "Options profit amplification analysis",
+             "timestamp": (now - timedelta(hours=6)).isoformat() + "Z",
+             "result": "Stock manipulation amplified options value: call options went from $8.75→$28.40 per contract (+224%). Options profit: $6.3M on $2.8M premium (2.25x return). Equity profit: $3.1M. Total cross-asset profit: $9.4M. Without options, equity-only return would have been 6.6%. With options leverage, effective return: 33.6%. Classic amplification scheme.",
+             "profit_amplification": {
+                 "option_price_before": 8.75,
+                 "option_price_after": 28.40,
+                 "option_return_pct": 224,
+                 "options_profit_usd": 6_300_000,
+                 "equity_profit_usd": 3_100_000,
+                 "total_profit_usd": 9_400_000,
+                 "equity_only_return_pct": 6.6,
+                 "combined_effective_return_pct": 33.6
+             }},
+            {"step": 4, "action": "Closing price manipulation (marking the close)",
+             "timestamp": (now - timedelta(hours=5)).isoformat() + "Z",
+             "result": "End-of-day order analysis: 72% of aggressive buys placed in final 10 minutes. Orders were above-market limit orders designed to walk up the price. On options expiration week, closing price determined options settlement. Account's orders moved closing price by avg $1.84/day (1.6%). Pattern consistent across 3 consecutive sessions.",
+             "closing_manipulation": {
+                 "pct_in_final_10min": 72,
+                 "order_type": "above-market limit orders",
+                 "avg_closing_impact_usd": 1.84,
+                 "avg_closing_impact_pct": 1.6,
+                 "expiration_week": True,
+                 "sessions_affected": 3
+             }},
+            {"step": 5, "action": "Cross-asset coordination evidence",
+             "timestamp": (now - timedelta(hours=4)).isoformat() + "Z",
+             "result": "Timeline proves coordinated scheme: (1) Options bought when stock was flat, (2) Aggressive equity buying began AFTER options positioned, (3) Buying concentrated at close to maximize settlement value, (4) Options exercised/sold within 48hrs of peak, (5) Equity position unwound over next 3 days. Communication records: 12 calls to options market-maker during buildup period.",
+             "coordination_evidence": {
+                 "options_before_equity": True,
+                 "closing_concentration": True,
+                 "options_exit_within_hours": 48,
+                 "equity_unwind_days": 3,
+                 "market_maker_calls": 12,
+                 "coordination_score": 97
+             }},
+            {"step": 6, "action": "Compliance review & regulatory framework",
+             "timestamp": (now - timedelta(hours=3)).isoformat() + "Z",
+             "result": "Compliance confirmed violations: (1) SEC Rule 10b-5 — manipulative trading to inflate stock price, (2) Securities Exchange Act §9(a)(2) — manipulation of security prices, (3) CBOE Rule 6.9 — options-related manipulation, (4) Reg SHO concerns on unwind. Cross-asset manipulation amplified market impact by 6.2x via options leverage.",
+             "compliance_findings": {
+                 "violations": ["SEC Rule 10b-5", "Exchange Act §9(a)(2)", "CBOE Rule 6.9", "Reg SHO"],
+                 "amplification_factor": 6.2,
+                 "market_impact_assessment": "significant — affected options settlement prices"
+             }},
+            {"step": 7, "action": "Regulatory referral",
+             "timestamp": (now - timedelta(hours=2)).isoformat() + "Z",
+             "result": "Joint referral to SEC (equity manipulation) and CBOE Market Regulation (options abuse). Evidence package includes: cross-asset timeline, order-level data (equity + options), closing price impact analysis, profit decomposition, and communication records. Account frozen, options positions force-closed.",
+             "referral": {
+                 "agencies": ["SEC", "CBOE Market Regulation", "FINRA"],
+                 "evidence": ["cross-asset timeline", "order-level data", "closing price analysis", "profit decomposition", "communication records"],
+                 "account_action": "frozen, options force-closed",
+                 "total_illicit_profit_usd": 9_400_000
+             }}
+        ],
+        "manipulation_summary": {
+            "total_profit_usd": 9_400_000,
+            "equity_profit_usd": 3_100_000,
+            "options_profit_usd": 6_300_000,
+            "amplification_factor": 6.2,
+            "stock_markup_pct": 6.6,
+            "options_return_pct": 224,
+            "days_of_manipulation": 4,
+            "closing_sessions_affected": 3
+        },
+        "total_steps": 7,
+        "total_duration_hours": 5,
+    }
+
+
+@router.post("/admin/data-sources/actone/scenarios/fx-manipulation")
+async def actone_scenario_fx_manipulation_proxy(current_user=Depends(get_current_user)):
+    """Run Cross-Asset Surveillance — FX Manipulation scenario end-to-end."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "Cross-Asset / Multi-Asset Surveillance — FX Manipulation",
+        "case_id": "ACT-SCEN-FXM-001",
+        "case_type": "surveillance",
+        "final_status": "closed_referred",
+        "priority": "critical",
+        "subject_profile": {
+            "desk_id": "FX-SPOT-G10",
+            "firm": "Sovereign Capital Markets",
+            "desk": "G10 FX Spot Trading",
+            "traders_involved": ["TRD-FX-201", "TRD-FX-202", "TRD-FX-203"],
+            "benchmark": "WM/Reuters 4pm London Fix",
+        },
+        "investigation_steps": [
+            {"step": 1, "action": "Benchmark rate manipulation detection",
+             "timestamp": (now - timedelta(hours=8)).isoformat() + "Z",
+             "result": "Detected systematic trading pattern around WM/Reuters 4pm London Fix over 45 trading days. Desk accumulated large EUR/USD positions ($840M notional avg) in the 15 minutes before the fix window, then executed aggressive orders during the 60-second fix calculation. Fix-window volume: 34% of daily volume concentrated in 60 seconds. Fix moved avg 4.2 pips in favorable direction.",
+             "fix_manipulation": {
+                 "benchmark": "WM/Reuters 4pm London Fix",
+                 "currency_pair": "EUR/USD",
+                 "avg_pre_fix_position_usd": 840_000_000,
+                 "pre_fix_accumulation_minutes": 15,
+                 "fix_window_seconds": 60,
+                 "fix_window_volume_pct": 34,
+                 "avg_fix_movement_pips": 4.2,
+                 "trading_days_analyzed": 45
+             }},
+            {"step": 2, "action": "Pre-hedging & front-running client orders",
+             "timestamp": (now - timedelta(hours=7, minutes=30)).isoformat() + "Z",
+             "result": "Client order analysis: desk received $2.1B in fix orders from 14 institutional clients (pension funds, asset managers). Before executing client orders at the fix, traders pre-positioned $840M in the same direction. Client orders were filled at the manipulated fix rate. Clients received avg 3.8 pips worse execution vs unmanipulated rate. Client harm: $6.2M over 45 days.",
+             "pre_hedging": {
+                 "client_fix_orders_usd": 2_100_000_000,
+                 "institutional_clients": 14,
+                 "pre_positioning_usd": 840_000_000,
+                 "client_slippage_pips": 3.8,
+                 "client_harm_usd": 6_200_000,
+                 "period_days": 45
+             }},
+            {"step": 3, "action": "Chat room collusion evidence",
+             "timestamp": (now - timedelta(hours=7)).isoformat() + "Z",
+             "result": "Bloomberg chat room 'The Club' — 4 traders from 3 banks sharing client order information before the fix. Messages: 'I have 500 to buy at fix', 'let's push it together', 'same side today — load up before'. 287 chat messages over 45 days coordinating fix trading. Traders shared net positions and agreed on direction.",
+             "chat_evidence": {
+                 "chat_room_name": "The Club",
+                 "participants": 4,
+                 "banks_involved": 3,
+                 "messages_analyzed": 287,
+                 "period_days": 45,
+                 "key_phrases": ["push it together", "same side today", "load up before", "I have 500 to buy at fix"],
+                 "order_sharing": True,
+                 "coordinated_direction": True
+             }},
+            {"step": 4, "action": "Statistical fix analysis",
+             "timestamp": (now - timedelta(hours=6)).isoformat() + "Z",
+             "result": "Fix rate deviated from pre-fix mid-market by avg 4.2 pips on days desk was active vs 0.8 pips on days desk was absent. Desk's directional success rate at fix: 91.1% (41/45 days). Random expectation: ~50%. Probability of observed pattern by chance: <1 in 10^9. Fix rate showed systematic bias in direction of desk's pre-positioned inventory.",
+             "statistical_analysis": {
+                 "avg_deviation_active_pips": 4.2,
+                 "avg_deviation_inactive_pips": 0.8,
+                 "directional_success_pct": 91.1,
+                 "successful_days": 41,
+                 "total_days": 45,
+                 "random_expectation_pct": 50,
+                 "probability_by_chance": "<1 in 10^9"
+             }},
+            {"step": 5, "action": "Profit calculation & victim impact",
+             "timestamp": (now - timedelta(hours=5)).isoformat() + "Z",
+             "result": "Desk profit from fix manipulation: $14.6M over 45 days ($324K/day avg). Client harm: $6.2M in worse execution. Total market impact: estimated $28M across all participants using the fix benchmark. Pension funds lost avg $890K each. Three asset managers filed complaints about abnormal fix execution quality.",
+             "profit_and_harm": {
+                 "desk_profit_usd": 14_600_000,
+                 "avg_daily_profit_usd": 324_000,
+                 "client_harm_usd": 6_200_000,
+                 "total_market_impact_usd": 28_000_000,
+                 "pension_fund_avg_loss_usd": 890_000,
+                 "client_complaints": 3
+             }},
+            {"step": 6, "action": "Compliance review & regulatory framework",
+             "timestamp": (now - timedelta(hours=4)).isoformat() + "Z",
+             "result": "Compliance confirmed: (1) FX Global Code of Conduct Principle 11 — benchmark manipulation, (2) CFTC Anti-Manipulation Rule — artificial price for benchmark, (3) FCA MAR Article 12 — benchmark manipulation, (4) DOJ wire fraud — coordinated scheme via chat rooms. Prior precedent: $11B in fines across 6 banks (2014-2015 FX scandal).",
+             "compliance_findings": {
+                 "violations": ["FX Global Code Principle 11", "CFTC Anti-Manipulation Rule", "FCA MAR Article 12", "DOJ Wire Fraud"],
+                 "prior_precedent": "$11B fines across 6 banks (2014-2015)",
+                 "cross_border": True
+             }},
+            {"step": 7, "action": "Multi-jurisdictional regulatory referral",
+             "timestamp": (now - timedelta(hours=3)).isoformat() + "Z",
+             "result": "Referrals filed: CFTC (US), FCA (UK), BaFin (Germany), FINMA (Switzerland) — cross-border FX manipulation. DOJ criminal referral for wire fraud and conspiracy. All 3 traders suspended, chat room access revoked. Client remediation program initiated ($6.2M). Firm conducting global review of all benchmark-related trading.",
+             "referral": {
+                 "agencies": ["CFTC", "FCA", "BaFin", "FINMA", "DOJ"],
+                 "traders_suspended": 3,
+                 "client_remediation_usd": 6_200_000,
+                 "criminal_referral": True,
+                 "firm_wide_review": True
+             }}
+        ],
+        "fx_manipulation_summary": {
+            "desk_profit_usd": 14_600_000,
+            "client_harm_usd": 6_200_000,
+            "market_impact_usd": 28_000_000,
+            "fix_movement_pips": 4.2,
+            "directional_success_pct": 91.1,
+            "trading_days": 45,
+            "banks_colluding": 3,
+            "chat_messages_evidence": 287
+        },
+        "total_steps": 7,
+        "total_duration_hours": 5,
+    }
+
+
+@router.post("/admin/data-sources/actone/scenarios/commodity-manipulation")
+async def actone_scenario_commodity_manipulation_proxy(current_user=Depends(get_current_user)):
+    """Run Cross-Asset Surveillance — Commodity Manipulation scenario end-to-end."""
+    now = datetime.utcnow()
+    return {
+        "scenario": "Cross-Asset / Multi-Asset Surveillance — Commodity Manipulation",
+        "case_id": "ACT-SCEN-COM-001",
+        "case_type": "surveillance",
+        "final_status": "closed_referred",
+        "priority": "critical",
+        "subject_profile": {
+            "entity_id": "ENT-CMD-4456",
+            "name": "Meridian Commodities Trading SA",
+            "entity_type": "physical + derivatives trader",
+            "commodities": ["copper", "aluminum"],
+            "exchanges": ["LME", "COMEX", "SHFE"],
+            "warehouse_locations": ["Rotterdam", "Singapore", "Detroit"],
+        },
+        "investigation_steps": [
+            {"step": 1, "action": "Physical-futures divergence detection",
+             "timestamp": (now - timedelta(hours=8)).isoformat() + "Z",
+             "result": "Detected abnormal divergence between physical copper market and COMEX futures. Entity controls 68% of LME-registered copper warehouse inventory (142,000 metric tons, $1.28B). Simultaneously built 24,000 COMEX copper futures contracts (long, $2.16B notional). Physical hoarding restricts supply → drives futures prices up. Futures premium over physical widened from $45→$285/ton (6.3x normal).",
+             "physical_futures_divergence": {
+                 "commodity": "copper",
+                 "warehouse_inventory_mt": 142_000,
+                 "warehouse_inventory_usd": 1_280_000_000,
+                 "warehouse_market_share_pct": 68,
+                 "futures_contracts": 24_000,
+                 "futures_notional_usd": 2_160_000_000,
+                 "premium_normal_per_ton": 45,
+                 "premium_manipulated_per_ton": 285,
+                 "premium_multiple": 6.3
+             }},
+            {"step": 2, "action": "Warehouse queue manipulation analysis",
+             "timestamp": (now - timedelta(hours=7, minutes=30)).isoformat() + "Z",
+             "result": "Entity deliberately slowed warehouse load-out queues from avg 14 days to 89 days by: (1) cancelling warrants then re-warranting same metal (shuffle), (2) filling load-out slots with internal transfers, (3) refusing to release metal to short-position holders requesting delivery. 340 complaints from industrial consumers unable to access physical copper. Queue manipulation created artificial scarcity.",
+             "warehouse_manipulation": {
+                 "normal_queue_days": 14,
+                 "manipulated_queue_days": 89,
+                 "warrant_cancellations": 1_840,
+                 "re_warranting_pct": 78,
+                 "internal_transfers": 420,
+                 "delivery_refusals": 67,
+                 "consumer_complaints": 340,
+                 "artificial_scarcity": True
+             }},
+            {"step": 3, "action": "Futures price impact measurement",
+             "timestamp": (now - timedelta(hours=7)).isoformat() + "Z",
+             "result": "COMEX copper futures rose 18.4% over 6 weeks during hoarding period (vs 2.1% for aluminum, a control commodity). Physical copper users (manufacturers, electronics) paid $285/ton premium for delivery. Entity's 24,000 futures contracts gained $397M in mark-to-market. Physical inventory appreciated $236M. Supply squeeze forced 12 industrial hedgers into margin calls totaling $89M.",
+             "price_impact": {
+                 "futures_price_increase_pct": 18.4,
+                 "control_commodity_increase_pct": 2.1,
+                 "delivery_premium_per_ton": 285,
+                 "futures_mtm_gain_usd": 397_000_000,
+                 "physical_appreciation_usd": 236_000_000,
+                 "total_gain_usd": 633_000_000,
+                 "industrial_margin_calls": 12,
+                 "margin_call_total_usd": 89_000_000
+             }},
+            {"step": 4, "action": "Cross-exchange arbitrage detection",
+             "timestamp": (now - timedelta(hours=6)).isoformat() + "Z",
+             "result": "Entity exploited price dislocations across exchanges: LME-COMEX spread widened from $12→$78/ton, LME-SHFE spread from $18→$142/ton. Entity simultaneously went long COMEX, short SHFE on same underlying copper. Cross-exchange arbitrage profit: $48M. Physical metal moved between warehouses to maximize spread — 23 shipments (86K tons) between Rotterdam and Singapore.",
+             "cross_exchange": {
+                 "lme_comex_spread_normal": 12,
+                 "lme_comex_spread_manipulated": 78,
+                 "lme_shfe_spread_normal": 18,
+                 "lme_shfe_spread_manipulated": 142,
+                 "arbitrage_profit_usd": 48_000_000,
+                 "shipments": 23,
+                 "shipped_tonnage": 86_000
+             }},
+            {"step": 5, "action": "Market participant harm assessment",
+             "timestamp": (now - timedelta(hours=5)).isoformat() + "Z",
+             "result": "Downstream impact: 340 industrial consumers faced 89-day delivery delays. 18 manufacturers reported production halts due to copper shortages. Automotive sector: 3 plants slowed production. Electronics: 2 chipmakers delayed orders. Total estimated downstream economic harm: $1.4B. Small commodity traders: 8 firms liquidated positions at losses due to margin pressure.",
+             "market_harm": {
+                 "consumers_affected": 340,
+                 "production_halts": 18,
+                 "automotive_plants_affected": 3,
+                 "chipmakers_delayed": 2,
+                 "downstream_harm_usd": 1_400_000_000,
+                 "small_traders_liquidated": 8
+             }},
+            {"step": 6, "action": "Compliance & regulatory framework",
+             "timestamp": (now - timedelta(hours=4)).isoformat() + "Z",
+             "result": "Violations identified: (1) CFTC Anti-Manipulation (CEA §9(a)(2)) — artificial price via physical hoarding, (2) LME Rule 7.4 — warehouse abuse, (3) Dodd-Frank §747 — position limits, (4) EU MAR Article 12 — commodity market manipulation. Prior precedent: JPMorgan $920M fine (2020, precious metals manipulation), Glencore $1.1B (2022, commodity manipulation).",
+             "compliance_findings": {
+                 "violations": ["CFTC CEA §9(a)(2)", "LME Rule 7.4", "Dodd-Frank §747", "EU MAR Article 12"],
+                 "prior_precedents": ["JPMorgan $920M (2020)", "Glencore $1.1B (2022)"],
+                 "cross_border": True
+             }},
+            {"step": 7, "action": "Multi-jurisdictional referral & enforcement",
+             "timestamp": (now - timedelta(hours=3)).isoformat() + "Z",
+             "result": "Referrals filed: CFTC (futures manipulation), LME Market Oversight (warehouse abuse), FCA (UK market manipulation), DOJ (criminal conspiracy to manipulate commodity markets). Emergency order: LME forced release of 40% of hoarded inventory within 30 days. Position limits imposed. Entity's warehouse operations under special supervision. Estimated restitution: $633M profits + $1.4B downstream damages.",
+             "referral": {
+                 "agencies": ["CFTC", "LME Market Oversight", "FCA", "DOJ"],
+                 "emergency_order": "forced release of 40% inventory within 30 days",
+                 "position_limits_imposed": True,
+                 "criminal_referral": True,
+                 "estimated_restitution_usd": 2_033_000_000
+             }}
+        ],
+        "commodity_manipulation_summary": {
+            "total_profit_usd": 633_000_000,
+            "futures_gain_usd": 397_000_000,
+            "physical_gain_usd": 236_000_000,
+            "arbitrage_profit_usd": 48_000_000,
+            "warehouse_share_pct": 68,
+            "futures_price_increase_pct": 18.4,
+            "downstream_harm_usd": 1_400_000_000,
+            "consumers_affected": 340
+        },
+        "total_steps": 7,
+        "total_duration_hours": 5,
+    }
+
+
 @router.get("/admin/data-sources/actone/customer360/{customer_id}")
 async def actone_customer360_proxy(customer_id: str, current_user=Depends(get_current_user)):
     """Get Customer 360 view for investigation."""
@@ -7459,6 +7807,33 @@ ALERTS = [
     {"alert_id": "ALT-20432", "alert_type": "unusual_profitability", "severity": "medium", "status": "new", "risk_score": 76, "priority": "medium",
      "customer_id": "TRD-5610", "customer_name": "Anya K. Petrov (Zenith Securities)", "description": "Moderate profit anomaly: 90-day Sharpe 3.21 (peer max 2.10). Win rate 78% concentrated in biotech sector around FDA decisions. $3.8M YTD (peer avg $1.4M). Could be skill vs information advantage — needs deeper analysis",
      "assigned_to": None, "rule_id": "SUR-018", "created_at": "2026-03-16T08:00:00Z", "updated_at": "2026-03-16T08:00:00Z"},
+    {"alert_id": "ALT-20440", "alert_type": "equity_options_manipulation", "severity": "critical", "status": "escalated", "risk_score": 97, "priority": "critical",
+     "customer_id": "ACC-EQ-7734", "customer_name": "Titan Structured Strategies LLC", "description": "Equity↔Options manipulation on CRWD: 420K shares + 3,200 OTM calls (6.2x leverage). Aggressive EOD buying (28% volume) pushed stock +6.6%. Options surged 224%. Total profit $9.4M. Closing manipulation on 3 sessions. Cross-asset coordination score: 97",
+     "assigned_to": "USR-001", "rule_id": "SUR-019", "created_at": "2026-03-13T10:00:00Z", "updated_at": "2026-03-18T11:00:00Z"},
+    {"alert_id": "ALT-20441", "alert_type": "equity_options_manipulation", "severity": "high", "status": "assigned", "risk_score": 88, "priority": "high",
+     "customer_id": "ACC-EQ-8891", "customer_name": "Vertex Capital Partners", "description": "Suspected equity-options scheme on SNOW: large equity accumulation + deep OTM calls before product launch. EOD buying concentration 22% of volume. Options +140%. Investigating whether price impact was intentional",
+     "assigned_to": "USR-005", "rule_id": "SUR-019", "created_at": "2026-03-15T09:00:00Z", "updated_at": "2026-03-17T14:00:00Z"},
+    {"alert_id": "ALT-20442", "alert_type": "equity_options_manipulation", "severity": "medium", "status": "new", "risk_score": 73, "priority": "medium",
+     "customer_id": "ACC-EQ-9023", "customer_name": "Ridgeline Trading Group", "description": "Possible cross-asset pattern on AMD: simultaneous equity + options buildup before earnings. Volume impact 14%. Options up 85%. Could be legitimate hedging — needs deeper review",
+     "assigned_to": None, "rule_id": "SUR-019", "created_at": "2026-03-17T11:00:00Z", "updated_at": "2026-03-17T11:00:00Z"},
+    {"alert_id": "ALT-20450", "alert_type": "fx_manipulation", "severity": "critical", "status": "escalated", "risk_score": 98, "priority": "critical",
+     "customer_id": "FX-DESK-201", "customer_name": "Sovereign Capital Markets (G10 FX Desk)", "description": "FX benchmark manipulation: WM/Reuters 4pm fix manipulated over 45 days. $840M pre-positioning, 4.2 pip avg fix movement, 91.1% directional success. Chat room collusion ('The Club') with 3 banks, 287 messages. Client harm $6.2M. Desk profit $14.6M",
+     "assigned_to": "USR-001", "rule_id": "SUR-020", "created_at": "2026-03-10T08:00:00Z", "updated_at": "2026-03-18T12:00:00Z"},
+    {"alert_id": "ALT-20451", "alert_type": "fx_manipulation", "severity": "high", "status": "assigned", "risk_score": 92, "priority": "high",
+     "customer_id": "FX-DESK-305", "customer_name": "Atlas Global FX (EM Desk)", "description": "Suspected fix manipulation on USD/MXN: concentrated trading in fix window (41% volume), 87% directional success over 28 days. Pre-positioning detected. Chat room participation under review. Client impact analysis pending",
+     "assigned_to": "USR-003", "rule_id": "SUR-020", "created_at": "2026-03-14T07:00:00Z", "updated_at": "2026-03-17T16:00:00Z"},
+    {"alert_id": "ALT-20452", "alert_type": "fx_manipulation", "severity": "medium", "status": "new", "risk_score": 71, "priority": "medium",
+     "customer_id": "FX-DESK-412", "customer_name": "Pacific Rim FX Trading", "description": "Potential fix-related anomaly on AUD/USD: above-average volume in fix window on 15 of 22 days. Directional success 72%. May be legitimate fix execution — needs statistical analysis",
+     "assigned_to": None, "rule_id": "SUR-020", "created_at": "2026-03-16T09:00:00Z", "updated_at": "2026-03-16T09:00:00Z"},
+    {"alert_id": "ALT-20460", "alert_type": "commodity_manipulation", "severity": "critical", "status": "escalated", "risk_score": 99, "priority": "critical",
+     "customer_id": "ENT-CMD-4456", "customer_name": "Meridian Commodities Trading SA", "description": "Commodity manipulation: 68% of LME copper warehouse inventory (142K MT, $1.28B) hoarded to squeeze supply. 24K COMEX futures contracts ($2.16B). Futures +18.4%. Queue 14→89 days. 340 consumer complaints. $633M total gain. $1.4B downstream harm",
+     "assigned_to": "USR-001", "rule_id": "SUR-021", "created_at": "2026-03-08T08:00:00Z", "updated_at": "2026-03-18T12:00:00Z"},
+    {"alert_id": "ALT-20461", "alert_type": "commodity_manipulation", "severity": "high", "status": "assigned", "risk_score": 91, "priority": "high",
+     "customer_id": "ENT-CMD-5578", "customer_name": "Global Metals Trading Corp", "description": "Suspected aluminum warehouse manipulation: entity controls 42% of LME aluminum inventory. Queue times increased from 18→62 days. Concurrent long futures position. 180 consumer complaints. Cross-exchange spread analysis pending",
+     "assigned_to": "USR-005", "rule_id": "SUR-021", "created_at": "2026-03-12T10:00:00Z", "updated_at": "2026-03-17T15:00:00Z"},
+    {"alert_id": "ALT-20462", "alert_type": "commodity_manipulation", "severity": "high", "status": "new", "risk_score": 83, "priority": "high",
+     "customer_id": "ENT-CMD-6692", "customer_name": "Pacific Basin Resources Ltd", "description": "Potential nickel squeeze: entity accumulated 31% of LME nickel warrants + large futures position. Delivery requests surged 4x. Spot premium widened. Similar to 2022 LME nickel short squeeze. Early-stage investigation",
+     "assigned_to": None, "rule_id": "SUR-021", "created_at": "2026-03-16T07:00:00Z", "updated_at": "2026-03-16T07:00:00Z"},
 ]
 
 

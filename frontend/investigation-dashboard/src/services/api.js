@@ -249,6 +249,12 @@ export const actoneScenarioRogueTrader = () =>
   api.post('/api/admin/data-sources/actone/scenarios/rogue-trader-detection');
 export const actoneScenarioUnusualProfitability = () =>
   api.post('/api/admin/data-sources/actone/scenarios/unusual-profitability');
+export const actoneScenarioEquityOptionsManipulation = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/equity-options-manipulation');
+export const actoneScenarioFxManipulation = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/fx-manipulation');
+export const actoneScenarioCommodityManipulation = () =>
+  api.post('/api/admin/data-sources/actone/scenarios/commodity-manipulation');
 export const getActoneCustomer360 = (customerId) =>
   api.get(`/api/admin/data-sources/actone/customer360/${customerId}`);
 export const getActoneStateMachine = () =>
