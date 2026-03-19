@@ -25,7 +25,7 @@ services:
       POSTGRES_USER: actimize
       POSTGRES_PASSWORD: actimize_secret
     ports:
-      - "5432:5432"
+      - "5434:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
@@ -110,7 +110,7 @@ services:
       context: .
       dockerfile: services/api-gateway/Dockerfile
     ports:
-      - "8000:8000"
+      - "8100:8000"
     environment:
       <<: *common-env
       SERVICE_NAME: api-gateway

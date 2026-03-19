@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 DATABASE_URL = (
     f"postgresql+asyncpg://"
     f"{os.getenv('POSTGRES_USER', 'actimize')}:{os.getenv('POSTGRES_PASSWORD', 'actimize_secret')}"
-    f"@{os.getenv('POSTGRES_HOST', 'localhost')}:{os.getenv('POSTGRES_PORT', '5432')}"
+    f"@{os.getenv('POSTGRES_HOST', 'localhost')}:{os.getenv('POSTGRES_PORT', '5434')}"
     f"/{os.getenv('POSTGRES_DB', 'actimize')}"
 )
 
