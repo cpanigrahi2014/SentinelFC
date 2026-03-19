@@ -9,11 +9,89 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Body, Depends, HTTPException, Query, status
 from pydantic import BaseModel
+from sqlalchemy import select, func, update as sa_update
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from shared.schemas import UserAuth, UserRole
 from shared.security import create_access_token, get_current_user
+from .db import get_db, db_available
 
 router = APIRouter()
+
+
+# ── ORM → dict helpers ────────────────────────────────────────────
+
+def _alert_to_dict(a) -> dict:
+    """Convert an Alert ORM object to the API response dict."""
+    return {
+        "alert_id": a.alert_id, "alert_type": a.alert_type, "severity": a.severity,
+        "status": a.status, "risk_score": a.risk_score, "priority": a.priority or "medium",
+        "customer_id": a.customer_id, "customer_name": a.customer_name,
+        "description": a.description, "assigned_to": a.assigned_to,
+        "rule_id": a.rule_id,
+        "created_at": a.created_at.isoformat() + "Z" if a.created_at else None,
+        "updated_at": a.updated_at.isoformat() + "Z" if a.updated_at else None,
+    }
+
+
+def _case_to_dict(c) -> dict:
+    """Convert a Case ORM object to the API response dict."""
+    d = {
+        "case_id": c.case_id, "title": c.title, "description": c.description,
+        "status": c.status, "priority": c.priority, "case_type": c.case_type,
+        "customer_id": c.customer_id, "customer_name": c.customer_name,
+        "assigned_to": c.assigned_to, "assigned_to_name": c.assigned_to_name,
+        "alert_ids": c.alert_ids or [],
+        "created_at": c.created_at.isoformat() + "Z" if c.created_at else None,
+        "updated_at": c.updated_at.isoformat() + "Z" if c.updated_at else None,
+    }
+    if c.escalation_reason:
+        d["escalation_reason"] = c.escalation_reason
+    if c.resolution:
+        d["resolution"] = c.resolution
+    if c.closed_at:
+        d["closed_at"] = c.closed_at.isoformat() + "Z"
+    return d
+
+
+def _sar_to_dict(s) -> dict:
+    """Convert a SuspiciousActivityReport ORM object to a dict."""
+    return {
+        "report_id": s.report_id, "case_id": s.case_id, "customer_id": s.customer_id,
+        "subject_name": s.subject_name, "customer_name": s.customer_name,
+        "filing_type": s.filing_type, "suspicious_activity_type": s.suspicious_activity_type,
+        "amount_involved": s.amount_involved,
+        "activity_start_date": s.activity_start_date.isoformat() if s.activity_start_date else None,
+        "activity_end_date": s.activity_end_date.isoformat() if s.activity_end_date else None,
+        "status": s.status, "narrative": s.narrative,
+        "created_at": s.created_at.isoformat() + "Z" if s.created_at else None,
+        "filing_date": s.filing_date.isoformat() + "Z" if s.filing_date else None,
+        "filing_reference": s.filing_reference,
+    }
+
+
+def _ctr_to_dict(r) -> dict:
+    """Convert a CurrencyTransactionReport ORM object to a dict."""
+    return {
+        "report_id": r.report_id, "customer_id": r.customer_id,
+        "customer_name": r.customer_name, "amount": r.amount,
+        "transaction_date": r.transaction_date.isoformat() + "Z" if r.transaction_date else None,
+        "transaction_id": r.transaction_id, "status": r.status,
+        "created_at": r.created_at.isoformat() + "Z" if r.created_at else None,
+        "filing_date": r.filing_date.isoformat() + "Z" if r.filing_date else None,
+    }
+
+
+def _audit_to_dict(l) -> dict:
+    """Convert an AuditLog ORM object to a dict."""
+    return {
+        "event_id": l.event_id,
+        "timestamp": l.timestamp.isoformat() + "Z" if l.timestamp else None,
+        "user_id": l.user_id, "username": l.username, "action": l.action,
+        "resource_type": l.resource_type, "resource_id": l.resource_id,
+        "service": l.service, "ip_address": l.ip_address,
+        "details": l.details, "status": l.status,
+    }
 
 # Demo user store (in production: PostgreSQL + proper password hashing)
 DEMO_USERS = {
@@ -8283,8 +8361,22 @@ async def get_audit_logs(
     user_id: Optional[str] = None,
     limit: int = Query(200, ge=1, le=1000),
     current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """Return platform audit logs with optional filters."""
+    if db is not None:
+        from database.models import AuditLog as AuditLogModel
+        q = select(AuditLogModel)
+        if action:
+            q = q.where(AuditLogModel.action == action)
+        if service:
+            q = q.where(AuditLogModel.service == service)
+        if user_id:
+            q = q.where(AuditLogModel.user_id == user_id)
+        q = q.order_by(AuditLogModel.timestamp.desc()).limit(limit)
+        result = await db.execute(q)
+        return {"logs": [_audit_to_dict(r) for r in result.scalars().all()]}
+    # Fallback to in-memory
     logs = AUDIT_LOGS.copy()
     if action:
         logs = [l for l in logs if l["action"] == action]
@@ -8300,8 +8392,16 @@ async def get_audit_logs(
 async def get_user_audit_trail(
     user_id: str,
     current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """Return audit trail for a specific user."""
+    if db is not None:
+        from database.models import AuditLog as AuditLogModel
+        q = select(AuditLogModel).where(AuditLogModel.user_id == user_id).order_by(AuditLogModel.timestamp.desc())
+        result = await db.execute(q)
+        user_logs = [_audit_to_dict(r) for r in result.scalars().all()]
+        return {"user_id": user_id, "logs": user_logs, "total": len(user_logs)}
+    # Fallback
     user_logs = [l for l in AUDIT_LOGS if l["user_id"] == user_id]
     user_logs.sort(key=lambda x: x["timestamp"], reverse=True)
     return {"user_id": user_id, "logs": user_logs, "total": len(user_logs)}
@@ -8447,8 +8547,22 @@ async def list_cases(
     assigned_to: Optional[str] = None,
     limit: int = Query(100, ge=1, le=500),
     current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """List investigation cases with optional filters."""
+    if db is not None:
+        from database.models import Case as CaseModel
+        q = select(CaseModel)
+        if status:
+            q = q.where(CaseModel.status == status)
+        if priority:
+            q = q.where(CaseModel.priority == priority)
+        if assigned_to:
+            q = q.where(CaseModel.assigned_to == assigned_to)
+        q = q.order_by(CaseModel.updated_at.desc()).limit(limit)
+        result = await db.execute(q)
+        return {"cases": [_case_to_dict(c) for c in result.scalars().all()]}
+    # Fallback
     cases = CASES.copy()
     if status:
         cases = [c for c in cases if c["status"] == status]
@@ -8461,8 +8575,23 @@ async def list_cases(
 
 
 @router.get("/cases/{case_id}")
-async def get_case(case_id: str, current_user=Depends(get_current_user)):
+async def get_case(case_id: str, current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Get full case details."""
+    if db is not None:
+        from database.models import Case as CaseModel, InvestigationNote
+        result = await db.execute(select(CaseModel).where(CaseModel.case_id == case_id))
+        case = result.scalar_one_or_none()
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        notes_result = await db.execute(
+            select(InvestigationNote).where(InvestigationNote.case_id == case_id).order_by(InvestigationNote.created_at)
+        )
+        notes = [{"note_id": n.note_id, "case_id": n.case_id, "author": n.created_by,
+                   "content": n.content, "note_type": n.note_type,
+                   "created_at": n.created_at.isoformat() + "Z" if n.created_at else None}
+                  for n in notes_result.scalars().all()]
+        return {**_case_to_dict(case), "notes": notes, "evidence": []}
+    # Fallback
     case = next((c for c in CASES if c["case_id"] == case_id), None)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
@@ -8470,9 +8599,30 @@ async def get_case(case_id: str, current_user=Depends(get_current_user)):
 
 
 @router.post("/cases")
-async def create_case(request: dict = Body(...), current_user=Depends(get_current_user)):
+async def create_case(request: dict = Body(...), current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Create a new investigation case."""
     data = request if isinstance(request, dict) else {}
+    if db is not None:
+        from database.models import Case as CaseModel
+        cnt_result = await db.execute(select(func.count()).select_from(CaseModel))
+        next_id = 1044 + cnt_result.scalar()
+        case = CaseModel(
+            case_id=f"CASE-{next_id}",
+            title=data.get("title", "New Investigation Case"),
+            description=data.get("description", ""),
+            status="open",
+            priority=data.get("priority", "medium"),
+            case_type=data.get("case_type", "aml"),
+            customer_id=data.get("customer_id", ""),
+            customer_name=data.get("customer_name", ""),
+            assigned_to=data.get("assigned_to", current_user.sub),
+            assigned_to_name="",
+            alert_ids=data.get("alert_ids", []),
+        )
+        db.add(case)
+        await db.flush()
+        return _case_to_dict(case)
+    # Fallback
     case_id = f"CASE-{1044 + len(CASES)}"
     case = {
         "case_id": case_id,
@@ -8494,12 +8644,23 @@ async def create_case(request: dict = Body(...), current_user=Depends(get_curren
 
 
 @router.put("/cases/{case_id}")
-async def update_case(case_id: str, request: dict = Body(...), current_user=Depends(get_current_user)):
+async def update_case(case_id: str, request: dict = Body(...), current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Update a case."""
+    data = request if isinstance(request, dict) else {}
+    if db is not None:
+        from database.models import Case as CaseModel
+        result = await db.execute(select(CaseModel).where(CaseModel.case_id == case_id))
+        case = result.scalar_one_or_none()
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        for field in ("status", "priority", "assigned_to", "description"):
+            if field in data:
+                setattr(case, field, data[field])
+        return _case_to_dict(case)
+    # Fallback
     case = next((c for c in CASES if c["case_id"] == case_id), None)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
-    data = request if isinstance(request, dict) else {}
     for field in ("status", "priority", "assigned_to", "description"):
         if field in data:
             case[field] = data[field]
@@ -8508,12 +8669,22 @@ async def update_case(case_id: str, request: dict = Body(...), current_user=Depe
 
 
 @router.post("/cases/{case_id}/escalate")
-async def escalate_case(case_id: str, request: dict = Body(default={}), current_user=Depends(get_current_user)):
+async def escalate_case(case_id: str, request: dict = Body(default={}), current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Escalate a case."""
+    data = request if isinstance(request, dict) else {}
+    if db is not None:
+        from database.models import Case as CaseModel
+        result = await db.execute(select(CaseModel).where(CaseModel.case_id == case_id))
+        case = result.scalar_one_or_none()
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        case.status = "escalated"
+        case.escalation_reason = data.get("reason", "")
+        return _case_to_dict(case)
+    # Fallback
     case = next((c for c in CASES if c["case_id"] == case_id), None)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
-    data = request if isinstance(request, dict) else {}
     case["status"] = "escalated"
     case["escalation_reason"] = data.get("reason", "")
     case["updated_at"] = datetime.utcnow().isoformat() + "Z"
@@ -8521,12 +8692,23 @@ async def escalate_case(case_id: str, request: dict = Body(default={}), current_
 
 
 @router.post("/cases/{case_id}/close")
-async def close_case(case_id: str, request: dict = Body(default={}), current_user=Depends(get_current_user)):
+async def close_case(case_id: str, request: dict = Body(default={}), current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Close a case with resolution."""
+    data = request if isinstance(request, dict) else {}
+    if db is not None:
+        from database.models import Case as CaseModel
+        result = await db.execute(select(CaseModel).where(CaseModel.case_id == case_id))
+        case = result.scalar_one_or_none()
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        case.status = "closed"
+        case.resolution = data.get("resolution", "no_action")
+        case.closed_at = datetime.utcnow()
+        return _case_to_dict(case)
+    # Fallback
     case = next((c for c in CASES if c["case_id"] == case_id), None)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
-    data = request if isinstance(request, dict) else {}
     case["status"] = "closed"
     case["resolution"] = data.get("resolution", "no_action")
     case["closed_at"] = datetime.utcnow().isoformat() + "Z"
@@ -8535,15 +8717,40 @@ async def close_case(case_id: str, request: dict = Body(default={}), current_use
 
 
 @router.get("/cases/{case_id}/notes")
-async def get_case_notes(case_id: str, current_user=Depends(get_current_user)):
+async def get_case_notes(case_id: str, current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Get notes for a case."""
+    if db is not None:
+        from database.models import InvestigationNote
+        result = await db.execute(
+            select(InvestigationNote).where(InvestigationNote.case_id == case_id).order_by(InvestigationNote.created_at)
+        )
+        notes = [{"note_id": n.note_id, "case_id": n.case_id, "author": n.created_by,
+                   "content": n.content, "note_type": n.note_type,
+                   "created_at": n.created_at.isoformat() + "Z" if n.created_at else None}
+                  for n in result.scalars().all()]
+        return {"notes": notes}
     return {"notes": CASE_NOTES.get(case_id, [])}
 
 
 @router.post("/cases/{case_id}/notes")
-async def add_case_note(case_id: str, request: dict = Body(...), current_user=Depends(get_current_user)):
+async def add_case_note(case_id: str, request: dict = Body(...), current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Add a note to a case."""
     data = request if isinstance(request, dict) else {}
+    if db is not None:
+        from database.models import InvestigationNote
+        note = InvestigationNote(
+            note_id=f"N-{random.randint(100, 9999)}",
+            case_id=case_id,
+            content=data.get("content", ""),
+            note_type=data.get("note_type", "general"),
+            created_by=current_user.sub,
+        )
+        db.add(note)
+        await db.flush()
+        return {"note_id": note.note_id, "case_id": case_id, "author": note.created_by,
+                "content": note.content, "note_type": note.note_type,
+                "created_at": note.created_at.isoformat() + "Z" if note.created_at else datetime.utcnow().isoformat() + "Z"}
+    # Fallback
     note = {
         "note_id": f"N-{random.randint(100, 999)}",
         "case_id": case_id,
@@ -8557,8 +8764,29 @@ async def add_case_note(case_id: str, request: dict = Body(...), current_user=De
 
 
 @router.post("/cases/{case_id}/generate-sar")
-async def generate_sar(case_id: str, request: dict = Body(default={}), current_user=Depends(get_current_user)):
+async def generate_sar(case_id: str, request: dict = Body(default={}), current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Generate a SAR for a case."""
+    if db is not None:
+        from database.models import Case as CaseModel, SuspiciousActivityReport
+        result = await db.execute(select(CaseModel).where(CaseModel.case_id == case_id))
+        case = result.scalar_one_or_none()
+        if not case:
+            raise HTTPException(status_code=404, detail="Case not found")
+        case.status = "filed"
+        sar_id = f"SAR-{random.randint(100, 999)}"
+        sar = SuspiciousActivityReport(
+            report_id=sar_id,
+            case_id=case_id,
+            customer_id=case.customer_id,
+            customer_name=case.customer_name,
+            subject_name=case.customer_name,
+            status="draft",
+        )
+        db.add(sar)
+        await db.flush()
+        return {"sar_id": sar_id, "case_id": case_id, "customer_id": case.customer_id,
+                "status": "draft", "created_at": datetime.utcnow().isoformat() + "Z"}
+    # Fallback
     case = next((c for c in CASES if c["case_id"] == case_id), None)
     if not case:
         raise HTTPException(status_code=404, detail="Case not found")
@@ -8866,8 +9094,24 @@ async def list_alerts(
     priority: Optional[str] = None,
     limit: int = Query(100, ge=1, le=500),
     current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """List alerts with optional filters."""
+    if db is not None:
+        from database.models import Alert as AlertModel
+        q = select(AlertModel)
+        if status:
+            q = q.where(AlertModel.status == status)
+        if severity:
+            q = q.where(AlertModel.severity == severity)
+        if alert_type:
+            q = q.where(AlertModel.alert_type == alert_type)
+        if priority:
+            q = q.where(AlertModel.priority == priority)
+        q = q.order_by(AlertModel.created_at.desc()).limit(limit)
+        result = await db.execute(q)
+        return {"alerts": [_alert_to_dict(a) for a in result.scalars().all()]}
+    # Fallback
     alerts = ALERTS.copy()
     if status:
         alerts = [a for a in alerts if a["status"] == status]
@@ -8882,8 +9126,16 @@ async def list_alerts(
 
 
 @router.get("/alerts/{alert_id}")
-async def get_alert(alert_id: str, current_user=Depends(get_current_user)):
+async def get_alert(alert_id: str, current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Get a specific alert."""
+    if db is not None:
+        from database.models import Alert as AlertModel
+        result = await db.execute(select(AlertModel).where(AlertModel.alert_id == alert_id))
+        alert = result.scalar_one_or_none()
+        if not alert:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        return _alert_to_dict(alert)
+    # Fallback
     alert = next((a for a in ALERTS if a["alert_id"] == alert_id), None)
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
@@ -8891,8 +9143,19 @@ async def get_alert(alert_id: str, current_user=Depends(get_current_user)):
 
 
 @router.put("/alerts/{alert_id}")
-async def update_alert(alert_id: str, request: dict = Body(...), current_user=Depends(get_current_user)):
+async def update_alert(alert_id: str, request: dict = Body(...), current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Update alert status, assignment, or priority."""
+    if db is not None:
+        from database.models import Alert as AlertModel
+        result = await db.execute(select(AlertModel).where(AlertModel.alert_id == alert_id))
+        alert = result.scalar_one_or_none()
+        if not alert:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        for field in ("status", "assigned_to", "priority"):
+            if field in request:
+                setattr(alert, field, request[field])
+        return _alert_to_dict(alert)
+    # Fallback
     alert = next((a for a in ALERTS if a["alert_id"] == alert_id), None)
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
@@ -8904,8 +9167,18 @@ async def update_alert(alert_id: str, request: dict = Body(...), current_user=De
 
 
 @router.post("/alerts/{alert_id}/assign")
-async def assign_alert(alert_id: str, request: dict = Body(...), current_user=Depends(get_current_user)):
+async def assign_alert(alert_id: str, request: dict = Body(...), current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Assign an alert to an analyst."""
+    if db is not None:
+        from database.models import Alert as AlertModel
+        result = await db.execute(select(AlertModel).where(AlertModel.alert_id == alert_id))
+        alert = result.scalar_one_or_none()
+        if not alert:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        alert.assigned_to = request.get("analyst_id", current_user.sub)
+        alert.status = "assigned"
+        return _alert_to_dict(alert)
+    # Fallback
     alert = next((a for a in ALERTS if a["alert_id"] == alert_id), None)
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
@@ -8916,8 +9189,18 @@ async def assign_alert(alert_id: str, request: dict = Body(...), current_user=De
 
 
 @router.post("/alerts/{alert_id}/escalate")
-async def escalate_alert(alert_id: str, request: dict = Body(default={}), current_user=Depends(get_current_user)):
+async def escalate_alert(alert_id: str, request: dict = Body(default={}), current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Escalate an alert."""
+    if db is not None:
+        from database.models import Alert as AlertModel
+        result = await db.execute(select(AlertModel).where(AlertModel.alert_id == alert_id))
+        alert = result.scalar_one_or_none()
+        if not alert:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        alert.status = "escalated"
+        alert.escalation_reason = request.get("reason", "")
+        return _alert_to_dict(alert)
+    # Fallback
     alert = next((a for a in ALERTS if a["alert_id"] == alert_id), None)
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
@@ -8928,8 +9211,19 @@ async def escalate_alert(alert_id: str, request: dict = Body(default={}), curren
 
 
 @router.post("/alerts/{alert_id}/close")
-async def close_alert(alert_id: str, request: dict = Body(default={}), current_user=Depends(get_current_user)):
+async def close_alert(alert_id: str, request: dict = Body(default={}), current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Close an alert."""
+    if db is not None:
+        from database.models import Alert as AlertModel
+        result = await db.execute(select(AlertModel).where(AlertModel.alert_id == alert_id))
+        alert = result.scalar_one_or_none()
+        if not alert:
+            raise HTTPException(status_code=404, detail="Alert not found")
+        alert.status = "closed"
+        alert.close_reason = request.get("resolution", "false_positive")
+        alert.closed_at = datetime.utcnow()
+        return _alert_to_dict(alert)
+    # Fallback
     alert = next((a for a in ALERTS if a["alert_id"] == alert_id), None)
     if not alert:
         raise HTTPException(status_code=404, detail="Alert not found")
@@ -9204,8 +9498,18 @@ CTR_REPORTS = [
 async def list_sar_reports(
     status: Optional[str] = None,
     current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """List Suspicious Activity Reports."""
+    if db is not None:
+        from database.models import SuspiciousActivityReport
+        q = select(SuspiciousActivityReport)
+        if status:
+            q = q.where(SuspiciousActivityReport.status == status)
+        q = q.order_by(SuspiciousActivityReport.created_at.desc())
+        result = await db.execute(q)
+        return {"reports": [_sar_to_dict(r) for r in result.scalars().all()]}
+    # Fallback
     reports = SAR_REPORTS.copy()
     if status:
         reports = [r for r in reports if r["status"] == status]
@@ -9216,8 +9520,18 @@ async def list_sar_reports(
 async def list_ctr_reports(
     status: Optional[str] = None,
     current_user=Depends(get_current_user),
+    db: AsyncSession = Depends(get_db),
 ):
     """List Currency Transaction Reports."""
+    if db is not None:
+        from database.models import CurrencyTransactionReport
+        q = select(CurrencyTransactionReport)
+        if status:
+            q = q.where(CurrencyTransactionReport.status == status)
+        q = q.order_by(CurrencyTransactionReport.created_at.desc())
+        result = await db.execute(q)
+        return {"reports": [_ctr_to_dict(r) for r in result.scalars().all()]}
+    # Fallback
     reports = CTR_REPORTS.copy()
     if status:
         reports = [r for r in reports if r["status"] == status]
@@ -9225,8 +9539,17 @@ async def list_ctr_reports(
 
 
 @router.post("/reports/sar/{report_id}/submit")
-async def submit_sar(report_id: str, current_user=Depends(get_current_user)):
+async def submit_sar(report_id: str, current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Submit a SAR for review."""
+    if db is not None:
+        from database.models import SuspiciousActivityReport
+        result = await db.execute(select(SuspiciousActivityReport).where(SuspiciousActivityReport.report_id == report_id))
+        sar = result.scalar_one_or_none()
+        if not sar:
+            raise HTTPException(status_code=404, detail="SAR not found")
+        sar.status = "pending_review"
+        return _sar_to_dict(sar)
+    # Fallback
     sar = next((r for r in SAR_REPORTS if r["report_id"] == report_id), None)
     if not sar:
         raise HTTPException(status_code=404, detail="SAR not found")
@@ -9236,8 +9559,17 @@ async def submit_sar(report_id: str, current_user=Depends(get_current_user)):
 
 
 @router.post("/reports/sar/{report_id}/approve")
-async def approve_sar(report_id: str, current_user=Depends(get_current_user)):
+async def approve_sar(report_id: str, current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """Approve a SAR for filing."""
+    if db is not None:
+        from database.models import SuspiciousActivityReport
+        result = await db.execute(select(SuspiciousActivityReport).where(SuspiciousActivityReport.report_id == report_id))
+        sar = result.scalar_one_or_none()
+        if not sar:
+            raise HTTPException(status_code=404, detail="SAR not found")
+        sar.status = "approved"
+        return _sar_to_dict(sar)
+    # Fallback
     sar = next((r for r in SAR_REPORTS if r["report_id"] == report_id), None)
     if not sar:
         raise HTTPException(status_code=404, detail="SAR not found")
@@ -9247,8 +9579,19 @@ async def approve_sar(report_id: str, current_user=Depends(get_current_user)):
 
 
 @router.post("/reports/sar/{report_id}/file")
-async def file_sar(report_id: str, current_user=Depends(get_current_user)):
+async def file_sar(report_id: str, current_user=Depends(get_current_user), db: AsyncSession = Depends(get_db)):
     """File a SAR with FinCEN."""
+    if db is not None:
+        from database.models import SuspiciousActivityReport
+        result = await db.execute(select(SuspiciousActivityReport).where(SuspiciousActivityReport.report_id == report_id))
+        sar = result.scalar_one_or_none()
+        if not sar:
+            raise HTTPException(status_code=404, detail="SAR not found")
+        sar.status = "filed"
+        sar.filing_date = datetime.utcnow()
+        sar.filing_reference = f"BSA-{secrets.token_hex(6).upper()}"
+        return _sar_to_dict(sar)
+    # Fallback
     sar = next((r for r in SAR_REPORTS if r["report_id"] == report_id), None)
     if not sar:
         raise HTTPException(status_code=404, detail="SAR not found")

@@ -4,6 +4,7 @@ import logging
 import os
 import time
 from collections import defaultdict
+from contextlib import asynccontextmanager
 from datetime import datetime, timedelta
 
 from fastapi import FastAPI, HTTPException, Request, status
@@ -11,14 +12,24 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
 from .routes import router
+from .db import init_db
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Startup / shutdown lifecycle hook."""
+    await init_db()
+    yield
+
 
 app = FastAPI(
     title="Actimize Platform - API Gateway",
     description="Central API gateway with authentication, routing, and rate limiting",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 # CORS configuration
@@ -83,7 +94,8 @@ app.include_router(router, prefix="/api", tags=["Gateway"])
 
 @app.get("/health")
 async def health_check():
-    return {"status": "healthy", "service": "api-gateway"}
+    from .db import db_available
+    return {"status": "healthy", "service": "api-gateway", "database": "connected" if db_available else "in-memory"}
 
 
 @app.get("/")
